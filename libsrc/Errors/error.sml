@@ -252,7 +252,7 @@ structure Error :> sig
           fun fmt' UNKNOWN = unkMsg
             | fmt' (LOC{file, l1, l2, c1, c2}) = let
                 val i2s = Int.toString
-                fun lc2s (l, c, items) = i2s l1 :: "." :: i2s c1 :: items
+                fun lc2s (l, c, items) = i2s l :: "." :: i2s c :: items
               (* convert items to a string *)
                 fun cvt (FILE, items) = file :: items
                   | cvt (LINE, items) = Int.toString l1 :: items
