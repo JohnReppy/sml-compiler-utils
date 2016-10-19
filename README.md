@@ -12,11 +12,15 @@ utility modules, and `tools`, which contains some code generation tools.
 
 #### Libraries
 
-* Errors -- error tracking for [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
+* CodeTemplates -- Infrastructure for supporting textual code snippits with substitutions.
 
-* Stamps -- unique stamps for tagging identifiers
+* Errors -- error tracking for [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
 
 * Floats -- A representation of floating-point literals plus support for converting
   to IEEE binary representations.
 
 * Logging -- Utility code for log messages and for timing compiler phases
+
+* Stamps -- unique stamps for tagging identifiers
+
+#### Tools
