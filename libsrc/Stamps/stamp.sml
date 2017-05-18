@@ -85,14 +85,14 @@ structure Stamp :> sig
 
     structure Key =
       struct
-        type ord_key = stamp
+        type ord_key = t
         val compare = compare
       end
     structure Map = RedBlackMapFn (Key)
     structure Set = RedBlackSetFn (Key)
 
     structure Tbl = HashTableFn (struct
-        type hash_key = stamp
+        type hash_key = t
         fun hashVal (STAMP{id}) = id
         fun sameKey (STAMP{id=a}, STAMP{id=b}) = (a = b)
       end)
