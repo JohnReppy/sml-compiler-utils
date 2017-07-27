@@ -27,7 +27,7 @@
 structure Error :> sig
 
   (* an exception to raise when hitting an unrecoverable error condition.
-   * This exception will be caught in the main program.
+   * This exception should be caught in the main program.
    *)
     exception ERROR
 
@@ -45,11 +45,15 @@ structure Error :> sig
     val sourceFile : err_stream -> string
     val sourceMap : err_stream -> AntlrStreamPos.sourcemap
 
-  (* add error messages to the error stream *)
+  (* add error messages to the error stream. Note that we append a newline onto
+   * the message, so it is not necessary to end the message with a newline.
+   *)
     val error : err_stream * string list -> unit
     val errorAt : err_stream * span * string list -> unit
 
-  (* add warning messages to the error stream *)
+  (* add warning messages to the error stream. Note that we append a newline onto
+   * the message, so it is not necessary to end the message with a newline.
+   *)
     val warning : err_stream * string list -> unit
     val warningAt : err_stream * span * string list -> unit
 
