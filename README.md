@@ -13,14 +13,19 @@ utility modules, and `tools`, which contains some code generation tools.
 #### Libraries
 
 * CodeTemplates -- Infrastructure for supporting textual code snippits with substitutions.
+    This code supports the [Make Fragments](#make-fragments) tool descrbied below.
 
 * Errors -- error tracking for [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
 
 * Floats -- A representation of floating-point literals plus support for converting
-  to IEEE binary representations.
+    to IEEE binary representations.
 
 * Logging -- Utility code for log messages and for timing compiler phases
 
 * Stamps -- unique stamps for tagging identifiers
 
 #### Tools
+
+* MakeFragments <a name="make-fragments"></a>
+    This directory contains tools for converting code fragments in source files into
+    SML string constants in an SML module.
