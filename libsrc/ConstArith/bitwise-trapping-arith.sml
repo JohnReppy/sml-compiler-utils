@@ -1,8 +1,10 @@
-(* sources.cm
+(* bitwise-trapping-arith.sml
  *
- * CM file to build float code on SML/NJ.
+ * Operations for constant-folding bitwise operations on constant integers,
+ * where the shift operations trap on overflow.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,24 +29,31 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-Library
+structure BitwiseTrappingArith : BITWISE_CONST_ARITH =
+  struct
 
-  signature IEEE_FLOAT_PARAMS
+  (* we use arbitrary-precision integers to represent constant values *)
+    type t = IntInf.int
 
-  structure FloatLit
+  (* bit-widths are represented as integers *)
+    type width = int
 
-  functor FloatToBitsFn
+  (* we mostly use the Wrapping implementations, since most bitwise operations
+   * cannot overflow.
+   *)
+    val bAnd = BitwiseWrappingArith.bAnd
+    val bOr  = BitwiseWrappingArith.bOr
+    val bXor = BitwiseWrappingArith.bXor
+    val nNot = BitwiseWrappingArith.nNot
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+    val bLShiftRight = BitwiseWrappingArith.bLShiftRight
+    val bAShiftRight = BitwiseWrappingArith.bAShiftRight
 
-is
+  (* logical left-shift operation.  If the value being shifted is negative,
+   * it will first be converted to the positive value with the same bit
+   * representation before being shifted.  We raise Overflow if the result
+   * is not representable.
+   *)
+    fun bShiftLeft (wid, a, b) = ??
 
-  $/basis.cm
-  $/smlnj-lib.cm
-
-  float-lit.sml
-  float-to-bits-fn.sml
+  end

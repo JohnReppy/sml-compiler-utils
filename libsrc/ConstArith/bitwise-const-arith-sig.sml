@@ -1,8 +1,9 @@
-(* sources.cm
+(* bitwise-const-arith-sig.sml
  *
- * CM file to build float code on SML/NJ.
+ * Operations for constant-folding bitwise operations on constant integers.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,24 +28,22 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-Library
+signature BITWISE_CONST_ARITH =
+  sig
 
-  signature IEEE_FLOAT_PARAMS
+  (* we use arbitrary-precision integers to represent constant values *)
+    type t = IntInf.int
 
-  structure FloatLit
+  (* bit-widths are represented as integers *)
+    type width = int
 
-  functor FloatToBitsFn
+    val bAnd : width * t * t -> t
+    val bOr  : width * t * t -> t
+    val bXor : width * t * t -> t
+    val nNot : width * t -> t
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+    val bLShiftRight : width * t * t -> t
+    val bAShiftRight : width * t * t -> t
+    val bShiftLeft   : width * t * t -> t
 
-is
-
-  $/basis.cm
-  $/smlnj-lib.cm
-
-  float-lit.sml
-  float-to-bits-fn.sml
+  end

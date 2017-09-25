@@ -1,8 +1,9 @@
-(* sources.cm
+(* unsigned-const-arith-sig.sml
  *
- * CM file to build float code on SML/NJ.
+ * Operations for constant-folding unsigned operations on constant integers.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,24 +28,28 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-Library
+signature UNSIGNED_CONST_ARITH =
+  sig
 
-  signature IEEE_FLOAT_PARAMS
+  (* we use arbitrary-precision integers to represent constant values *)
+    type t = IntInf.int
 
-  structure FloatLit
+  (* bit-widths are represented as integers *)
+    type width = int
 
-  functor FloatToBitsFn
+  (* narrow an unsigned value to the range 0..2^WID^-1; depending on the semantics
+   * of the implementation, this function may raise Overflow on values that are
+   * outside the range -2^(WID-1)^..pow2^(WID)^-1.
+   *)
+    val uNarrow : width * t -> t
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+  (* converts values in range -2^(WID-1)^..pow2^(WID-1)^-1 to 0..pow2^(WID)^-1 *)
+    val toUnsigned : width * t -> t
 
-is
+    val uAdd  : width * t * t -> t
+    val uSub  : width * t * t -> t
+    val uMul  : width * t * t -> t
+    val uDiv  : width * t * t -> t
+    val uMod  : width * t * t -> t
 
-  $/basis.cm
-  $/smlnj-lib.cm
-
-  float-lit.sml
-  float-to-bits-fn.sml
+  end

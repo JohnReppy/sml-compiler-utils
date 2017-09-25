@@ -1,8 +1,8 @@
 (* sources.cm
  *
- * CM file to build float code on SML/NJ.
+ * CM file to build constant-floding code on SML/NJ.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,22 +29,38 @@
 
 Library
 
-  signature IEEE_FLOAT_PARAMS
+  signature BITWISE_CONST_ARITH
+  signature CONST_ARITH
+  signature SIGNED_CONST_ARITH
+  signature UNSIGNED_CONST_ARITH
 
-  structure FloatLit
+(* functor for gluing together different implementations into a single module that
+ * implements the CONST_ARITH signature
+ *)
+  functor ConstArithGlueFn
 
-  functor FloatToBitsFn
+  structure BitwiseTrappingArith		(* bitwise operations with wrapping semantics *)
+  structure BitwiseWrappingArith		(* bitwise operations with wrapping semantics *)
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+  structure SignedTrappingArith			(* signed operations with trapping semantics *)
+  structure SignedWrappingArith			(* signed operations with trapping semantics *)
+
+  structure UnsignedTrappingArith		(* unsigned operations with trapping semantics *)
+  structure UnsignedWrappingArith		(* unsigned operations with wrapping semantics *)
 
 is
 
   $/basis.cm
   $/smlnj-lib.cm
 
-  float-lit.sml
-  float-to-bits-fn.sml
+  bitwise-const-arith-sig.sml
+  bitwise-trapping-arith.sml
+  bitwise-wrapping-arith.sml
+  const-arith-glue-fn.sml
+  const-arith-sig.sml
+  signed-const-arith-sig.sml
+  signed-trapping-arith.sml
+  signed-wrapping-arith.sml
+  unsigned-const-arith-sig.sml
+  unsigned-trapping-arith.sml
+  unsigned-wrapping-arith.sml

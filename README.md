@@ -15,6 +15,9 @@ utility modules, and `tools`, which contains some code generation tools.
 * CodeTemplates -- Infrastructure for supporting textual code snippits with substitutions.
     This code supports the [Make Fragments](#make-fragments) tool descrbied below.
 
+* [Constant arithemetic](libsrc/ConstArith/README.md) -- Infrastructure for
+    constant-folding integer arithmetic at different precisions.
+
 * Errors -- error tracking for [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
 
 * Floats -- A representation of floating-point literals plus support for converting

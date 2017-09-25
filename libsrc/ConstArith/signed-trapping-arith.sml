@@ -1,8 +1,9 @@
-(* sources.cm
+(* signed-trapping-arith.sml
  *
- * CM file to build float code on SML/NJ.
+ * Implements signed, trapping arithmetic.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,24 +28,37 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-Library
+structure SignedTrappingArith : SIGNED_CONST_ARITH =
+  struct
 
-  signature IEEE_FLOAT_PARAMS
+    type t = IntInf.int
+    type width = int
 
-  structure FloatLit
+    fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
-  functor FloatToBitsFn
+  (* narrow the representation of n to `wid` bits, which just means checking if it is
+   * representable and raising Overflow if not.
+   *)
+    fun sNarrow (wid, n) = let
+          val limit = pow2(wid - 1)
+          in
+	    if (n < ~limit) orelse (limit <= n)
+	      then raise Overflow
+              else n
+	  end
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+    fun toSigned (wid, a) = if a < pow2(wid - 1)
+	  then a
+	  else IntInf.notb a + 1
 
-is
+    fun sAdd (wid, a, b) = sNarrow (wid, a + b)
+    fun sSub (wid, a, b) = sNarrow (wid, a - b)
+    fun sMul (wid, a, b) = sNarrow (wid, a * b)
+    fun sDiv (wid, a, b) = sNarrow (wid, a div b)
+    fun sMod (wid, a, b) = sNarrow (wid, a mod b)
+    fun sQuot (wid, a, b) = sNarrow (wid, IntInf.quot(a, b))
+    fun sRem (wid, a, b) = sNarrow (wid, IntInf.mod(a, b))
+    fun sNeg (wid, a) = sNarrow (wid, ~a)
+    fun sAbs (wid, a) = if (a < 0) then sNarrow (wid, ~a) else a
 
-  $/basis.cm
-  $/smlnj-lib.cm
-
-  float-lit.sml
-  float-to-bits-fn.sml
+  end
