@@ -1,13 +1,13 @@
 ## Compiler Utilities
 
-This project collects together a bunch of utiloity modules and code-generation
+This project collects together a bunch of utility modules and code-generation
 tools that I've used over the years in various compiler projects.  The code is
 written in Standard ML (as are the tools) and assumes the presence of the
 SML/NJ library.
 
 ### Roadmap
 
-Thecode is organized into two subdirectories: `libsrc`, which contains the various SML
+The code is organized into two subdirectories: `libsrc`, which contains the various SML
 utility modules, and `tools`, which contains some code generation tools.
 
 #### Libraries
@@ -25,7 +25,7 @@ utility modules, and `tools`, which contains some code generation tools.
 
 * Logging -- Utility code for log messages and for timing compiler phases
 
-* Stamps -- unique stamps for tagging identifiers
+* Stamps -- unique stamps for tagging identifiers and other semantic objects
 
 #### Tools
 

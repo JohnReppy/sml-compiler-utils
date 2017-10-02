@@ -50,6 +50,14 @@ structure UnsignedTrappingArith : UNSIGNED_CONST_ARITH =
     fun uSub (wid, a, b) = uNarrow (wid, a - b)
     fun uMul (wid, a, b) = uNarrow (wid, a * b)
     fun uDiv (wid, a, b) = uNarrow (wid, IntInf.quot(a, b))
-    fun uMod (wid, a, b) = uNarrow (wid, IntInf.rem(a, b))
+    fun uMod (_, 0, 0) = raise Div (* workaround for bug in SML/NJ pre 110.82 *)
+      | uMod (wid, a, b) = uNarrow (wid, IntInf.rem(a, b))
+
+  (* 2's complement of unsigned argument as unsigned value *)
+    fun uNeg (wid, a) = let
+	  val mask = pow2 wid - 1
+	  in
+	    IntInf.andb(mask, IntInf.xorb(mask, a) + 1)
+	  end
 
   end

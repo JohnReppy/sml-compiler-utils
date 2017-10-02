@@ -1,6 +1,9 @@
 (* sources.cm
  *
- * CM file to build constant-floding code on SML/NJ.
+ * CM file to build constant-folding code on SML/NJ.  The main purpose of this
+ * file is to support testing of the library, since it is assumed that users
+ * of this code will just include the pieces that they find useful in their
+ * own sources.
  *
  * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
  *

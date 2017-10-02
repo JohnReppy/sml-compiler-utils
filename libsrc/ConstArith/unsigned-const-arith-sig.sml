@@ -39,11 +39,11 @@ signature UNSIGNED_CONST_ARITH =
 
   (* narrow an unsigned value to the range 0..2^WID^-1; depending on the semantics
    * of the implementation, this function may raise Overflow on values that are
-   * outside the range -2^(WID-1)^..pow2^(WID)^-1.
+   * outside the range -2^(WID-1)^..2^(WID)^-1.
    *)
     val uNarrow : width * t -> t
 
-  (* converts values in range -2^(WID-1)^..pow2^(WID-1)^-1 to 0..pow2^(WID)^-1 *)
+  (* converts values in range -2^(WID-1)^..2^(WID-1)^-1 to 0..2^(WID)^-1 *)
     val toUnsigned : width * t -> t
 
     val uAdd  : width * t * t -> t
@@ -51,5 +51,8 @@ signature UNSIGNED_CONST_ARITH =
     val uMul  : width * t * t -> t
     val uDiv  : width * t * t -> t
     val uMod  : width * t * t -> t
+
+  (* 2's complement of argument as unsigned value *)
+    val uNeg  : width * t -> t
 
   end
