@@ -44,7 +44,7 @@ structure BitwiseTrappingArith : BITWISE_CONST_ARITH =
     val bAnd = BitwiseWrappingArith.bAnd
     val bOr  = BitwiseWrappingArith.bOr
     val bXor = BitwiseWrappingArith.bXor
-    val nNot = BitwiseWrappingArith.nNot
+    val bNot = BitwiseWrappingArith.nNot
 
     val bLShiftRight = BitwiseWrappingArith.bLShiftRight
     val bAShiftRight = BitwiseWrappingArith.bAShiftRight

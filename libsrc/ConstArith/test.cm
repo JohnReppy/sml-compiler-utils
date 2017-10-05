@@ -29,6 +29,9 @@
 
 Library
 
+  structure TestBitwiseTrapping
+  structure TestBitwiseWrapping
+
   structure TestUnsignedWrapping
   structure TestTrappingWrapping
 

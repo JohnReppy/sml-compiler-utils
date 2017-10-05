@@ -44,7 +44,7 @@ structure BitwiseWrappingArith : BITWISE_CONST_ARITH =
     fun bAnd (wid, a, b) = narrow (wid, IntInf.andb(a, b))
     fun bOr (wid, a, b) = narrow (wid, IntInf.orb(a, b))
     fun bXor (wid, a, b) = narrow (wid, IntInf.xorb(a, b))
-    fun nNot (wid, a) = IntInf.xorb(a, pow2 wid - 1)
+    fun bNot (wid, a) = IntInf.xorb(a, pow2 wid - 1)
 
   (* left-shift operation.  If the value being shifted is negative, then we narrow
    * the result by mapping values < -2^(wid-1) to zero.  If the value being shifted

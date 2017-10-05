@@ -37,19 +37,22 @@ Library
   signature SIGNED_CONST_ARITH
   signature UNSIGNED_CONST_ARITH
 
+  structure BitwiseTrappingArith		(* bitwise operations with trapping semantics *)
+  structure BitwiseWrappingArith		(* bitwise operations with wrapping semantics *)
+
+  structure SignedTrappingArith			(* signed operations with trapping semantics *)
+  structure SignedWrappingArith			(* signed operations with wrapping semantics *)
+
+  structure UnsignedTrappingArith		(* unsigned operations with trapping semantics *)
+  structure UnsignedWrappingArith		(* unsigned operations with wrapping semantics *)
+
 (* functor for gluing together different implementations into a single module that
  * implements the CONST_ARITH signature
  *)
   functor ConstArithGlueFn
 
-  structure BitwiseTrappingArith		(* bitwise operations with wrapping semantics *)
-  structure BitwiseWrappingArith		(* bitwise operations with wrapping semantics *)
-
-  structure SignedTrappingArith			(* signed operations with trapping semantics *)
-  structure SignedWrappingArith			(* signed operations with trapping semantics *)
-
-  structure UnsignedTrappingArith		(* unsigned operations with trapping semantics *)
-  structure UnsignedWrappingArith		(* unsigned operations with wrapping semantics *)
+(* functors for checking the arguments to the various operations *)
+  functor CheckBitwiseArithFn
 
 is
 

@@ -34,6 +34,40 @@ where the `Overflow` exception is raised when values are two large to be represe
 in the specified number of bits, and a *wrapping* implementation, where results are
 narrowed to the specified precision.
 
+````sml
+structure BitwiseTrappingArith : BITWISE_CONST_ARITH
+structure BitwiseWrappingArith : BITWISE_CONST_ARITH
+
+structure SignedTrappingArith : SIGNED_CONST_ARITH
+structure SignedWrappingArith : SIGNED_CONST_ARITH
+
+structure UnsignedTrappingArith : UNSIGNED_CONST_ARITH
+structure UnsignedWrappingArith : UNSIGNED_CONST_ARITH
+````
+
+In addition, the `ConstArithGlueFn` functor can be used to glue three modules into an
+implementation of the `CONST_ARITH` signature.
+
+````sml
+functor ConstArithGlueFn (
+    structure B : BITWISE_CONST_ARITH
+    structure S : SIGNED_CONST_ARITH
+    structure U : UNSIGNED_CONST_ARITH
+  ) : CONST_ARITH
+````
+
+Lastly, there are functors that wrap the three types of arithmetic modules with
+error checking of the arguments.  These are meant to be used when one wants to
+include internal consistency checking in one's compiler.
+
+````sml
+functor CheckBitwiseArithFn (A : BITWISE_CONST_ARITH) : BITWISE_CONST_ARITH
+
+functor CheckSignedArithFn (A : SIGNED_CONST_ARITH) : SIGNED_CONST_ARITH
+
+functor CheckUnsignedArithFn (A : UNSIGNED_CONST_ARITH) : UNSIGNED_CONST_ARITH
+````
+
 ### Examples
 
 In languages like **C** and **C++**, integer arithmetic is non-trapping.  We can define
@@ -41,17 +75,17 @@ an instatiation of the `CONST_ARITH` interface for these languages by using the 
 implementations:
 
 ````sml
-structure CArith = ConstArithFn (
+structure CArith = ConstArithGlueFn (
     structure B = BitwiseWrappingArith
     structure S = SignedWrappingArith
     structure U = UnsignedWrappingArith)
 ````
 
 In Standard ML, however, the semantics of arithmetic is more complicated, since signed operations
-are trapping, while unsigned operations wrap.
+are trapping, while unsigned operations (*i.e.*, `word` operations) wrap.
 
 ````sml
-structure SMLArith = ConstArithFn (
+structure SMLArith = ConstArithGlueFn (
     structure B = BitwiseWrappingArith
     structure S = SignedTrappingArith
     structure U = UnsignedWrappingArith)
