@@ -62,6 +62,9 @@ is
   bitwise-const-arith-sig.sml
   bitwise-trapping-arith.sml
   bitwise-wrapping-arith.sml
+  check-bitwise-arith-fn.sml
+  check-signed-arith-fn.sml
+  check-unsigned-arith-fn.sml
   const-arith-glue-fn.sml
   const-arith-sig.sml
   signed-const-arith-sig.sml
