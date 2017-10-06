@@ -79,15 +79,14 @@ functor CheckSignedArithFn (
   (* converts values in range 0..pow2(width)-1 to -pow2(width-1)..pow2(width-1)-1 *)
     val toSigned : width * t -> t
 
-    val sAdd  : width * t * t -> t
-    val sSub  : width * t * t -> t
-    val sMul  : width * t * t -> t
-    val sDiv  : width * t * t -> t	(* division (round toward -∞) *)
-    val sMod  : width * t * t -> t	(* sMod(n, m) = n - m*sDiv(n, m) *)
-    val sQuot : width * t * t -> t	(* division (round toward 0) *)
-    val sRem  : width * t * t -> t	(* sRem(n, m) = n - m*sQuot(n, m) *)
-    val sNeg  : width * t -> t		(* unary negation *)
-    val sAbs  : width * t -> t		(* absolute value *)
+    val sAdd  = chk2 "sAdd" A.sAdd
+    val sSub  = chk2 "sSub" A.sSub
+    val sMul  = chk2 "sMul" A.sMul
+    val sDiv  = chk2 "sDiv" A.sDiv
+    val sMod  = chk2 "sMod" A.sMod
+    val sQuot = chk2 "sQuot" A.sQuot
+    val sRem  = chk2 "sRem" A.sRem
+    val sNeg  = chk1 "sNeg" A.sNeg
+    val sAbs  = chk1 "sAbs" A.sAbs
 
   end
-

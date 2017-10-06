@@ -79,14 +79,11 @@ functor CheckUnsignedArithFn (
   (* converts values in range -2^(WID-1)^..2^(WID-1)^-1 to 0..2^(WID)^-1 *)
     val toUnsigned : width * t -> t
 
-    val uAdd  : width * t * t -> t
-    val uSub  : width * t * t -> t
-    val uMul  : width * t * t -> t
-    val uDiv  : width * t * t -> t
-    val uMod  : width * t * t -> t
-
-  (* 2's complement of argument as unsigned value *)
-    val uNeg  : width * t -> t
+    val uAdd  = chk2 "uAdd" A.uAdd
+    val uSub  = chk2 "uSub" A.uSub
+    val uMul  = chk2 "uMul" A.uMul
+    val uDiv  = chk2 "uDiv" A.uDiv
+    val uMod  = chk2 "uMod" A.uMod
+    val uNeg  = chk1 "uNeg" A.uNeg
 
   end
-
