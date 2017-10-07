@@ -12,8 +12,9 @@ utility modules, and `tools`, which contains some code generation tools.
 
 #### Libraries
 
-* CodeTemplates -- Infrastructure for supporting textual code snippits with substitutions.
-    This code supports the [Make Fragments](#make-fragments) tool descrbied below.
+* [CodeTemplates](libsrc/CodeTemplates/README.md) <a name="make-fragments"></a> --
+    Infrastructure for supporting textual code snippits with substitutions.  This
+    code supports the [Make Fragments](#make-fragments) tool descrbied below.
 
 * [Constant arithemetic](libsrc/ConstArith/README.md) -- Infrastructure for
     constant-folding integer arithmetic at different precisions.
@@ -29,6 +30,6 @@ utility modules, and `tools`, which contains some code generation tools.
 
 #### Tools
 
-* MakeFragments <a name="make-fragments"></a>
+* [MakeFragments](tools/MakeFragments/README.md) <a name="make-fragments"></a> --
     This directory contains tools for converting source-code fragments into
     SML string constants in an SML module.
