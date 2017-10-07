@@ -61,12 +61,37 @@ error checking of the arguments.  These are meant to be used when one wants to
 include internal consistency checking in one's compiler.
 
 ````sml
-functor CheckBitwiseArithFn (A : BITWISE_CONST_ARITH) : BITWISE_CONST_ARITH
+functor CheckBitwiseArithFn (
+    structure A : BITWISE_CONST_ARITH
+    val qual : string
+    val error : string -> 'a
+  ) : BITWISE_CONST_ARITH
 
-functor CheckSignedArithFn (A : SIGNED_CONST_ARITH) : SIGNED_CONST_ARITH
+functor CheckSignedArithFn (
+    structure A : SIGNED_CONST_ARITH
+    val qual : string
+    val error : string -> 'a
+  ) : SIGNED_CONST_ARITH
 
-functor CheckUnsignedArithFn (A : UNSIGNED_CONST_ARITH) : UNSIGNED_CONST_ARITH
+functor CheckUnsignedArithFn (
+    structure A : UNSIGNED_CONST_ARITH
+    val qual : string
+    val error : string -> 'a
+  ) : UNSIGNED_CONST_ARITH
 ````
+
+The `A` structure argument is the structure being wrapped; the `qual` argument
+is typically the name of the structure with a trailing period (*e.g.*, `"BitwiseTrappingArith."`);
+and the `error` argument is a function for reporting errors.  The `error` function
+is not expected to return.  For example, we can define an implementation of bitwise
+arithmetic that checks that its arguments are within range as follows:
+
+```
+structure BitwiseArith = CheckBitwiseArithFn (
+    structure A = BitwiseWrappingArith
+    val qual = "BitwiseWrappingArith."
+    fun error msg = raise Fail msg)
+```
 
 ### Examples
 
@@ -91,3 +116,23 @@ structure SMLArith = ConstArithGlueFn (
     structure U = UnsignedWrappingArith)
 ````
 
+### Roadmap
+
+* `README.md` -- this file
+* `bitwise-const-arith-sig.sml` -- the `BITWISE_CONST_ARITH` signature
+* `bitwise-trapping-arith.sml` -- the `BitwiseTrappingArith` structure
+* `bitwise-wrapping-arith.sml` -- the `BitwiseWrappingArith` structure
+* `check-bitwise-arith-fn.sml` -- the `CheckBitwiseArithFn` functor
+* `check-signed-arith-fn.sml` -- the `CheckSignedArithFn` functor
+* `check-unsigned-arith-fn.sml` -- the `CheckUnsignedArithFn` functor
+* `const-arith-glue-fn.sml` -- the `ConstArithGlueFn` functor
+* `const-arith-sig.sml` -- the `CONST_ARITH` signature
+* `signed-const-arith-sig.sml` -- the `SIGNED_CONST_ARITH` signature
+* `signed-trapping-arith.sml` -- the `SignedTrappingArith` structure
+* `signed-wrapping-arith.sml` -- the `SignedWrappingArith` structure
+* `sources.cm` -- CM file for compiling the code
+* `test.cm` -- CM code for testing the code
+* `test.sml` -- test cases
+* `unsigned-const-arith-sig.sml` -- the `UNSIGNED_CONST_ARITH` signature
+* `unsigned-trapping-arith.sml` -- the `UnsignedTrappingArith` structure
+* `unsigned-wrapping-arith.sml` -- the `UnsignedWrappingArith` structure
