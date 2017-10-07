@@ -1,8 +1,10 @@
-(* sources.cm
+(* const-arith-glue-fn.sml
  *
- * CM file to build float code on SML/NJ.
+ * A functor for gluing together implementations of signed, unsigned, and bitwise
+ * operations into a single structure.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,24 +29,18 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-Library
+functor ConstArithGlueFn (
+    structure S : SIGNED_CONST_ARITH
+    structure U : UNSIGNED_CONST_ARITH
+    structure B : BITWISE_CONST_ARITH
+  ) : CONST_ARITH =
+  struct
 
-  signature IEEE_FLOAT_PARAMS
+    type t = IntInf.int
+    type width = int
 
-  structure FloatLit
+    open S U B
 
-  functor FloatToBitsFn
+  end
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
 
-is
-
-  $/basis.cm
-  $/smlnj-lib.cm
-
-  float-lit.sml
-  float-to-bits-fn.sml

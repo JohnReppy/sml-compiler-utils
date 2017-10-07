@@ -1,8 +1,8 @@
-(* sources.cm
+(* test.cm
  *
- * CM file to build float code on SML/NJ.
+ * CM file to build and run tests of the constant-arithmetic modules
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,22 +29,16 @@
 
 Library
 
-  signature IEEE_FLOAT_PARAMS
+  structure TestBitwiseTrapping
+  structure TestBitwiseWrapping
 
-  structure FloatLit
-
-  functor FloatToBitsFn
-
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+  structure TestUnsignedWrapping
+  structure TestTrappingWrapping
 
 is
 
   $/basis.cm
-  $/smlnj-lib.cm
 
-  float-lit.sml
-  float-to-bits-fn.sml
+  sources.cm
+
+  test.sml

@@ -1,8 +1,10 @@
-(* sources.cm
+(* unsigned-trapping-arith.sml
  *
- * CM file to build float code on SML/NJ.
+ * Implements unsigned arithmetic.  Results that are out of range wrap (e.g.,
+ * max-int + 1 = 0) result in the Overflow exception being raised.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,26 +27,37 @@
  * This file is part of the SML Compiler Utilities, which can be found at
  *
  *      https://github.com/JohnReppy/sml-compiler-utils
+ *
+ * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * All rights reserved.
  *)
 
-Library
+structure UnsignedTrappingArith : UNSIGNED_CONST_ARITH =
+  struct
 
-  signature IEEE_FLOAT_PARAMS
+    type t = IntInf.int
+    type width = int
 
-  structure FloatLit
+    fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
-  functor FloatToBitsFn
+    fun uNarrow (wid, n) = if (n < 0) orelse (pow2 wid <= n)
+	  then raise Overflow
+	  else n
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+    fun toUnsigned (wid, n) = IntInf.andb(n, pow2 wid - 1)
 
-is
+    fun uAdd (wid, a, b) = uNarrow (wid, a + b)
+    fun uSub (wid, a, b) = uNarrow (wid, a - b)
+    fun uMul (wid, a, b) = uNarrow (wid, a * b)
+    fun uDiv (wid, a, b) = uNarrow (wid, IntInf.quot(a, b))
+    fun uMod (_, 0, 0) = raise Div (* workaround for bug in SML/NJ pre 110.82 *)
+      | uMod (wid, a, b) = uNarrow (wid, IntInf.rem(a, b))
 
-  $/basis.cm
-  $/smlnj-lib.cm
+  (* 2's complement of unsigned argument as unsigned value *)
+    fun uNeg (wid, a) = let
+	  val mask = pow2 wid - 1
+	  in
+	    IntInf.andb(mask, IntInf.xorb(mask, a) + 1)
+	  end
 
-  float-lit.sml
-  float-to-bits-fn.sml
+  end
