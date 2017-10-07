@@ -51,29 +51,33 @@ functor CheckBitwiseArithFn (
     fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
     fun chkWid err w = if (w < 1) then err() else w
-    fun chkArg err (w, n) = if (n < 0) orelse (pow2 w <= n) then err() else n
+    fun chkArg err w = let val limit = pow2 w
+	  in
+	    fn n => if (n < 0) orelse (limit <= n) then err() else n
+	  end
 
     fun chk1 name f (w, arg) = let
 	  fun err () = error(concat[
 		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg, ")'"
 		])
 	  in
-	    fn (w, arg) => f (chkWid err w, chkArg err arg)
+	    f (chkWid err w, chkArg err w arg)
 	  end
 
     fun chk2 name f (w, arg1, arg2) = let
 	  fun err () = error(concat[
-		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", "
+		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", ",
 		  IntInf.toString arg2, ")'"
 		])
+	  val chkArg = chkArg err w
 	  in
-	    fn (w, arg) => f (chkWid err w, chkArg err arg1, chkArg err arg2)
+	    f (chkWid err w, chkArg arg1, chkArg arg2)
 	  end
 
     val bAnd = chk2 "bAnd" A.bAnd
     val bOr  = chk2 "bOr" A.bOr
     val bXor = chk2 "bXor" A.bXor
-    val nNot = chk1 "nNot" A.nNot
+    val bNot = chk1 "nNot" A.bNot
 
     val bLShiftRight = chk2 "bLShiftRight" A.bLShiftRight
     val bAShiftRight = chk2 "bAShiftRight" A.bAShiftRight

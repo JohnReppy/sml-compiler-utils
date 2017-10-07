@@ -32,8 +32,11 @@ Library
   structure TestBitwiseTrapping
   structure TestBitwiseWrapping
 
+  structure TestSignedTrapping
+  structure TestSignedWrapping
+
   structure TestUnsignedWrapping
-  structure TestTrappingWrapping
+  structure TestUnsignedTrapping
 
 is
 

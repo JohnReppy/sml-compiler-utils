@@ -70,7 +70,7 @@ signature CONST_ARITH =
     val bAnd : width * t * t -> t
     val bOr  : width * t * t -> t
     val bXor : width * t * t -> t
-    val nNot : width * t -> t
+    val bNot : width * t -> t
 
   (* bit-shifting operations *)
     val bLShiftRight : width * t * t -> t	(* logical shift right (i.e., with zero-extend) *)
