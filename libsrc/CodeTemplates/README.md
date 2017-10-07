@@ -13,8 +13,8 @@ CodeTemplate.expand substitutions text
 
 which expands the string `text` by replacing *placeholders* with their expansion as
 specified in the list of id-value pairs `substitutions`.  Placeholders in `text`
-have the syntax `@`<id>`@` and are replaced with the string associated with <id>
-in the list `substitutions`.  If <id> is empty, then no substitution
+have the syntax `@`&lt;id&gt;`@` and are replaced with the string associated with
+&lt;id&gt; in the list `substitutions`.  If &lt;id&gt; is empty, then no substitution
 is applied, instead the `"@@"` is replaced by `"@"`.
 
 I often use this mechanism to handle boilerplate code in compilers
