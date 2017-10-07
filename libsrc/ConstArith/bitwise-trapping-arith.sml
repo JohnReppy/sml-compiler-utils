@@ -44,7 +44,7 @@ structure BitwiseTrappingArith : BITWISE_CONST_ARITH =
     val bAnd = BitwiseWrappingArith.bAnd
     val bOr  = BitwiseWrappingArith.bOr
     val bXor = BitwiseWrappingArith.bXor
-    val bNot = BitwiseWrappingArith.nNot
+    val bNot = BitwiseWrappingArith.bNot
 
     val bLShiftRight = BitwiseWrappingArith.bLShiftRight
     val bAShiftRight = BitwiseWrappingArith.bAShiftRight
@@ -54,6 +54,6 @@ structure BitwiseTrappingArith : BITWISE_CONST_ARITH =
    * representation before being shifted.  We raise Overflow if the result
    * is not representable.
    *)
-    fun bShiftLeft (wid, a, b) = ??
+    fun bShiftLeft (wid, a, b) = raise Fail "TODO"
 
   end

@@ -51,7 +51,11 @@ functor CheckSignedArithFn (
     fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
     fun chkWid err w = if (w < 1) then err() else w
-    fun chkArg err (w, n) = if (n < 0) orelse (pow2 w <= n) then err() else n
+    fun chkArg err w = let
+          val limit = pow2 (w-1)
+          in
+            fn n => if (n < ~limit) orelse (limit <= n) then err() else n
+          end
 
     fun chk1 name f (w, arg) = let
 	  fun err () = error(concat[
@@ -66,18 +70,26 @@ functor CheckSignedArithFn (
 		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", "
 		  IntInf.toString arg2, ")'"
 		])
+          val chkArg = chkArg err w
 	  in
-	    fn (w, arg) => f (chkWid err w, chkArg err arg1, chkArg err arg2)
+	    f (chkWid err w, chkArg err arg1, chkArg err arg2)
 	  end
 
-  (* narrow a signed-constant to fit within the range -2^(WID-1)^..2^(WID-1)^-1.
-   * Depending on the semantics structure implementing this signature, this operation
-   * may raise Overflow on values that are outside the range -2^(WID-1)^..pow2^(WID-1)^.
-   *)
-    val sNarrow : width * t -> t
+    fun sNarrow (w, n) =
+	(* no checking of second argument because A.sNarrow does that *)
+	  if (w < 1)
+	    then error(concat[
+		"'", qual, "sNarrow(", Int.toString w, ", ", IntInf.toString n, ")'"
+	      ])
+	    else A.sNarrow (w, n)
 
   (* converts values in range 0..pow2(width)-1 to -pow2(width-1)..pow2(width-1)-1 *)
-    val toSigned : width * t -> t
+    fun toSigned (w, n) =
+	  if (w < 1) orelse (n < 0) orelse (pow2 w <= n)
+	    then error(concat[
+		"'", qual, "toSigned(", Int.toString w, ", ", IntInf.toString n, ")'"
+	      ])
+	    else A.toSigned (w, n)
 
     val sAdd  = chk2 "sAdd" A.sAdd
     val sSub  = chk2 "sSub" A.sSub

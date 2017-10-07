@@ -58,7 +58,7 @@ functor CheckUnsignedArithFn (
 		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg, ")'"
 		])
 	  in
-	    fn (w, arg) => f (chkWid err w, chkArg err arg)
+	    f (chkWid err w, chkArg err arg)
 	  end
 
     fun chk2 name f (w, arg1, arg2) = let
@@ -67,17 +67,31 @@ functor CheckUnsignedArithFn (
 		  IntInf.toString arg2, ")'"
 		])
 	  in
-	    fn (w, arg) => f (chkWid err w, chkArg err arg1, chkArg err arg2)
+	    f (chkWid err w, chkArg err arg1, chkArg err arg2)
 	  end
 
   (* narrow an unsigned value to the range 0..2^WID^-1; depending on the semantics
    * of the implementation, this function may raise Overflow on values that are
    * outside the range -2^(WID-1)^..2^(WID)^-1.
    *)
-    val uNarrow : width * t -> t
+    fun uNarrow (w, n) =
+        (* no checking of second argument because A.sNarrow does that *)
+	  if (w < 1)
+	    then error(concat[
+		"'", qual, "uNarrow(", Int.toString w, ", ", IntInf.toString n, ")'"
+	      ])
+	    else A.uNarrow (w, n)
 
   (* converts values in range -2^(WID-1)^..2^(WID-1)^-1 to 0..2^(WID)^-1 *)
-    val toUnsigned : width * t -> t
+    fun toUnsigned (w, n) = let
+          val limit = pow2 (w-1)
+          in
+	    if (w < 1) orelse (n < ~limit) orelse (limit <= n)
+	      then error(concat[
+		  "'", qual, "toUnsigned(", Int.toString w, ", ", IntInf.toString n, ")'"
+		])
+	      else A.toUnsigned (w, n)
+	  end
 
     val uAdd  = chk2 "uAdd" A.uAdd
     val uSub  = chk2 "uSub" A.uSub
