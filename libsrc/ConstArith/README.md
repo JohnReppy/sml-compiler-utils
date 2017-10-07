@@ -86,7 +86,7 @@ and the `error` argument is a function for reporting errors.  The `error` functi
 is not expected to return.  For example, we can define an implementation of bitwise
 arithmetic that checks that its arguments are within range as follows:
 
-```
+```sml
 structure BitwiseArith = CheckBitwiseArithFn (
     structure A = BitwiseWrappingArith
     val qual = "BitwiseWrappingArith."
