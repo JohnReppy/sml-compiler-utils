@@ -51,6 +51,8 @@ signature CONST_ARITH =
     val sMod  : width * t * t -> t	(* sMod(n, m) = n - m*sDiv(n, m) *)
     val sQuot : width * t * t -> t	(* division (round toward 0) *)
     val sRem  : width * t * t -> t	(* sRem(n, m) = n - m*sQuot(n, m) *)
+    val sShL  : width * t * t -> t	(* shift left *)
+    val sShR  : width * t * t -> t	(* shift right (sign-extend) *)
     val sNeg  : width * t -> t		(* unary negation *)
     val sAbs  : width * t -> t		(* absolute value *)
 
@@ -65,17 +67,14 @@ signature CONST_ARITH =
     val uMul  : width * t * t -> t
     val uDiv  : width * t * t -> t	(* division (round toward 0) *)
     val uMod  : width * t * t -> t	(* uMod(n, m) = n - m*uDiv(n, m) *)
+    val uShL  : width * t * t -> t	(* shift left *)
+    val uShR  : width * t * t -> t	(* shift right (zero-extend) *)
 
   (* bitwise operations (these never trap) *)
     val bAnd : width * t * t -> t
     val bOr  : width * t * t -> t
     val bXor : width * t * t -> t
     val bNot : width * t -> t
-
-  (* bit-shifting operations *)
-    val bLShiftRight : width * t * t -> t	(* logical shift right (i.e., with zero-extend) *)
-    val bAShiftRight : width * t * t -> t	(* arithmetic shift right (i.e., with sign extend) *)
-    val bShiftLeft   : width * t * t -> t	(* shift left *)
 
   (* conversions between signed and unsigned interpretations *)
     val toSigned : width * t -> t	(* unsigned -> signed; uses sNarrow for overflow checking  *)

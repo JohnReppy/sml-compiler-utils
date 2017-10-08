@@ -61,4 +61,17 @@ structure SignedTrappingArith : SIGNED_CONST_ARITH =
     fun sNeg (wid, a) = sNarrow (wid, ~a)
     fun sAbs (wid, a) = if (a < 0) then sNarrow (wid, ~a) else a
 
+  (* signed left-shift operation. *)
+    fun sShL (wid, a, b) =
+          if (b >= IntInf.fromInt wid)
+            then 0
+            else sNarrow (wid, IntInf.<<(a, Word.fromLargeInt b))
+
+  (* signed right-shift operation. Shift amounts that are >= wid result in zero. *)
+    fun sShR (wid, a, b) = let
+          val shft = Word.fromLargeInt(IntInf.min(b, IntInf.fromInt wid))
+ 	  in
+	    sNarrow (wid, IntInf.~>>(a, shft))
+	  end
+
   end

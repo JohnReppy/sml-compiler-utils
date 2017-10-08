@@ -29,14 +29,13 @@ The `CONST_ARITH` signature is a union of these three signatures.
 
 ### Implementations
 
-Each of the three signatures has two implementations: a *trapping* implementation
-where the `Overflow` exception is raised when values are two large to be represented
-in the specified number of bits, and a *wrapping* implementation, where results are
-narrowed to the specified precision.
+The signed and unsigned arithmetic signatures have two implementations:
+a *trapping* implementation where the `Overflow` exception is raised when
+values are two large to be represented in the specified number of bits, and
+a *wrapping* implementation, where results are narrowed to the specified precision.
 
 ````sml
-structure BitwiseTrappingArith : BITWISE_CONST_ARITH
-structure BitwiseWrappingArith : BITWISE_CONST_ARITH
+structure BitwiseConstArith : BITWISE_CONST_ARITH
 
 structure SignedTrappingArith : SIGNED_CONST_ARITH
 structure SignedWrappingArith : SIGNED_CONST_ARITH
@@ -101,7 +100,7 @@ implementations:
 
 ````sml
 structure CArith = ConstArithGlueFn (
-    structure B = BitwiseWrappingArith
+    structure B = BitwiseConstArith
     structure S = SignedWrappingArith
     structure U = UnsignedWrappingArith)
 ````
@@ -111,7 +110,7 @@ are trapping, while unsigned operations (*i.e.*, `word` operations) wrap.
 
 ````sml
 structure SMLArith = ConstArithGlueFn (
-    structure B = BitwiseWrappingArith
+    structure B = BitwiseConstArith
     structure S = SignedTrappingArith
     structure U = UnsignedWrappingArith)
 ````
@@ -120,8 +119,7 @@ structure SMLArith = ConstArithGlueFn (
 
 * `README.md` -- this file
 * `bitwise-const-arith-sig.sml` -- the `BITWISE_CONST_ARITH` signature
-* `bitwise-trapping-arith.sml` -- the `BitwiseTrappingArith` structure
-* `bitwise-wrapping-arith.sml` -- the `BitwiseWrappingArith` structure
+* `bitwise-const-arith.sml` -- the `BitwiseConstArith` structure
 * `check-bitwise-arith-fn.sml` -- the `CheckBitwiseArithFn` functor
 * `check-signed-arith-fn.sml` -- the `CheckSignedArithFn` functor
 * `check-unsigned-arith-fn.sml` -- the `CheckUnsignedArithFn` functor

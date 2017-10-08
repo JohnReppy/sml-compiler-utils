@@ -36,10 +36,9 @@ structure SignedWrappingArith : SIGNED_CONST_ARITH =
 
     fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
-  (* narrow the representation of n to `wid` bits, which just means checking if it is
-   * representable and raising Overflow if not.
+  (* narrow the representation of n to `wid` bits.
    *)
-    fun sNarrow (wid, n) = let (* FIXME *)
+    fun sNarrow (wid, n) = let (* FIXME: this is implementing trapping!!! *)
           val limit = pow2(wid - 1)
           in
 	    if (n < ~limit) orelse (limit <= n)
@@ -60,5 +59,18 @@ structure SignedWrappingArith : SIGNED_CONST_ARITH =
     fun sRem (wid, a, b) = sNarrow (wid, IntInf.mod(a, b))
     fun sNeg (wid, a) = sNarrow (wid, ~a)
     fun sAbs (wid, a) = if (a < 0) then sNarrow (wid, ~a) else a
+
+  (* signed left-shift operation. Shift amounts that are >= wid result in zero. *)
+    fun sShL (wid, a, b) =
+          if (b >= IntInf.fromInt wid)
+            then 0
+            else sNarrow (wid, IntInf.<<(a, Word.fromLargeInt b))
+
+  (* signed right-shift operation. Shift amounts that are >= wid result in zero. *)
+    fun sShR (wid, a, b) = let
+          val shft = Word.fromLargeInt(IntInf.min(b, IntInf.fromInt wid))
+ 	  in
+	    sNarrow (wid, IntInf.~>>(a, shft))
+	  end
 
   end

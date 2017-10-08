@@ -53,6 +53,8 @@ signature SIGNED_CONST_ARITH =
     val sMod  : width * t * t -> t	(* sMod(n, m) = n - m*sDiv(n, m) *)
     val sQuot : width * t * t -> t	(* division (round toward 0) *)
     val sRem  : width * t * t -> t	(* sRem(n, m) = n - m*sQuot(n, m) *)
+    val sShL  : width * t * t -> t	(* shift left *)
+    val sShR  : width * t * t -> t	(* shift right (sign-extend) *)
     val sNeg  : width * t -> t		(* unary negation *)
     val sAbs  : width * t -> t		(* absolute value *)
 

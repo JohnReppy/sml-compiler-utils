@@ -62,17 +62,17 @@ functor CheckSignedArithFn (
 		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg, ")'"
 		])
 	  in
-	    fn (w, arg) => f (chkWid err w, chkArg err arg)
+	    f (chkWid err w, chkArg err w arg)
 	  end
 
     fun chk2 name f (w, arg1, arg2) = let
 	  fun err () = error(concat[
-		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", "
+		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", ",
 		  IntInf.toString arg2, ")'"
 		])
           val chkArg = chkArg err w
 	  in
-	    f (chkWid err w, chkArg err arg1, chkArg err arg2)
+	    f (chkWid err w, chkArg arg1, chkArg arg2)
 	  end
 
     fun sNarrow (w, n) =
@@ -100,5 +100,19 @@ functor CheckSignedArithFn (
     val sRem  = chk2 "sRem" A.sRem
     val sNeg  = chk1 "sNeg" A.sNeg
     val sAbs  = chk1 "sAbs" A.sAbs
+
+    fun chkShift name f (w, arg, shft) = let
+	  fun err () = error(concat[
+		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg, ", ",
+		  IntInf.toString shft, ")'"
+		])
+	  in
+            if (shft < 0) orelse (pow2 w <= shft)
+              then err ()
+	      else f (chkWid err w, chkArg err w arg, shft)
+	  end
+
+    val sShL = chk2 "sShL" A.sShL
+    val sShR = chk2 "sShR" A.sShR
 
   end

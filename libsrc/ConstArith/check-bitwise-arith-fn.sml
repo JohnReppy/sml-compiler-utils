@@ -79,8 +79,4 @@ functor CheckBitwiseArithFn (
     val bXor = chk2 "bXor" A.bXor
     val bNot = chk1 "nNot" A.bNot
 
-    val bLShiftRight = chk2 "bLShiftRight" A.bLShiftRight
-    val bAShiftRight = chk2 "bAShiftRight" A.bAShiftRight
-    val bShiftLeft   = chk2 "bShiftLeft" A.bShiftLeft
-
   end

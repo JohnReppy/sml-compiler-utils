@@ -1,7 +1,6 @@
-(* bitwise-trapping-arith.sml
+(* bitwise-const-arith.sml
  *
- * Operations for constant-folding bitwise operations on constant integers,
- * where the shift operations trap on overflow.
+ * Operations for constant-folding bitwise operations on constant integers.
  *
  * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
  * All rights reserved.
@@ -29,7 +28,7 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-structure BitwiseTrappingArith : BITWISE_CONST_ARITH =
+structure BitwiseConstArith : BITWISE_CONST_ARITH =
   struct
 
   (* we use arbitrary-precision integers to represent constant values *)
@@ -38,22 +37,13 @@ structure BitwiseTrappingArith : BITWISE_CONST_ARITH =
   (* bit-widths are represented as integers *)
     type width = int
 
-  (* we mostly use the Wrapping implementations, since most bitwise operations
-   * cannot overflow.
-   *)
-    val bAnd = BitwiseWrappingArith.bAnd
-    val bOr  = BitwiseWrappingArith.bOr
-    val bXor = BitwiseWrappingArith.bXor
-    val bNot = BitwiseWrappingArith.bNot
+    fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
-    val bLShiftRight = BitwiseWrappingArith.bLShiftRight
-    val bAShiftRight = BitwiseWrappingArith.bAShiftRight
+    fun narrow (wid, n) = IntInf.andb(n, pow2 wid - 1)
 
-  (* logical left-shift operation.  If the value being shifted is negative,
-   * it will first be converted to the positive value with the same bit
-   * representation before being shifted.  We raise Overflow if the result
-   * is not representable.
-   *)
-    fun bShiftLeft (wid, a, b) = raise Fail "TODO"
+    fun bAnd (wid, a, b) = narrow (wid, IntInf.andb(a, b))
+    fun bOr (wid, a, b) = narrow (wid, IntInf.orb(a, b))
+    fun bXor (wid, a, b) = narrow (wid, IntInf.xorb(a, b))
+    fun bNot (wid, a) = narrow (wid, IntInf.xorb(a, pow2 wid - 1))
 
   end

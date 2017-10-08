@@ -85,16 +85,19 @@ structure TestUtil =
 
   end; (* TestUtil *)
 
-(* tests that are common across both Trapping and Wrapping implementations
- * of the Bitwise operations.
- *)
-structure BitwiseTests =
+structure TestBitwiseArith =
   struct
     local
       datatype z = datatype TestUtil.value
-      type test_case = int * IntInf.int * IntInf.int * TestUtil.value
+      structure A = BitwiseConstArith
+      val check1 = TestUtil.check1 "BitwiseConstArith"
+      val check2 = TestUtil.check2 "BitwiseConstArith"
+      val bAnd = check2 "AND" A.bAnd
+      val bOr  = check2 "OR" A.bOr
+      val bXor = check2 "XOR" A.bXor
+      val bNot = check1 "NOT" A.bNot
     in
-    val bAndTests : test_case list = [
+    val _ = List.app bAnd [
 	    (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
 	    (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
 	    (3, 1, 0, INT 0),   (3, 1, 1, INT 1),   (3, 1, 2, INT 0),   (3, 1, 3, INT 1),
@@ -112,7 +115,7 @@ structure BitwiseTests =
 	    (3, 7, 0, INT 0),   (3, 7, 1, INT 1),   (3, 7, 2, INT 2),   (3, 7, 3, INT 3),
 	    (3, 7, 4, INT 4),   (3, 7, 5, INT 5),   (3, 7, 6, INT 6),   (3, 7, 7, INT 7)
 	  ]
-    val bOrTests : test_case list = [
+    val _ = List.app bOr [
 	    (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
 	    (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
 	    (3, 1, 0, INT 1),   (3, 1, 1, INT 1),   (3, 1, 2, INT 3),   (3, 1, 3, INT 3),
@@ -130,7 +133,7 @@ structure BitwiseTests =
 	    (3, 7, 0, INT 7),   (3, 7, 1, INT 7),   (3, 7, 2, INT 7),   (3, 7, 3, INT 7),
 	    (3, 7, 4, INT 7),   (3, 7, 5, INT 7),   (3, 7, 6, INT 7),   (3, 7, 7, INT 7)
 	  ]
-    val bXorTests : test_case list = [
+    val _ = List.app bXor [
 	    (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
 	    (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
 	    (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, INT 3),   (3, 1, 3, INT 2),
@@ -148,60 +151,12 @@ structure BitwiseTests =
 	    (3, 7, 0, INT 7),   (3, 7, 1, INT 6),   (3, 7, 2, INT 5),   (3, 7, 3, INT 4),
 	    (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
 	  ]
-    val bNotTests : (int * IntInf.int * TestUtil.value) list = [
+    val _ = List.app bNot [
 	    (3, 0, INT 7),   (3, 1, INT 6),   (3, 2, INT 5),   (3, 3, INT 4),
 	    (3, 4, INT 3),   (3, 5, INT 2),   (3, 6, INT 1),   (3, 7, INT 0)
 	  ]
-    end
-  end
-
-structure TestBitwiseTrapping =
-  struct
-    local
-      datatype z = datatype TestUtil.value
-      structure A = BitwiseTrappingArith
-      val check1 = TestUtil.check1 "BitwiseTrappingArith"
-      val check2 = TestUtil.check2 "BitwiseTrappingArith"
-      val bAnd = check2 "AND" A.bAnd
-      val bOr  = check2 "OR" A.bOr
-      val bXor = check2 "XOR" A.bXor
-      val bNot = check1 "NOT" A.bNot
-(*
-      val bLShiftRight : width * t * t -> t
-      val bAShiftRight : width * t * t -> t
-      val bShiftLeft   : width * t * t -> t
-*)
-    in
-    val _ = List.app bAnd BitwiseTests.bAndTests
-    val _ = List.app bOr BitwiseTests.bOrTests
-    val _ = List.app bXor BitwiseTests.bXorTests
-    val _ = List.app bNot BitwiseTests.bNotTests
     end (* local *)
-  end (* TestBitwiseTrapping *)
-
-structure TestBitwiseWrapping =
-  struct
-    local
-      datatype z = datatype TestUtil.value
-      structure A = BitwiseWrappingArith
-      val check1 = TestUtil.check1 "BitwiseWrappingArith"
-      val check2 = TestUtil.check2 "BitwiseWrappingArith"
-      val bAnd = check2 "AND" A.bAnd
-      val bOr  = check2 "OR" A.bOr
-      val bXor = check2 "XOR" A.bXor
-      val bNot = check1 "NOT" A.bNot
-(*
-      val bLShiftRight : width * t * t -> t
-      val bAShiftRight : width * t * t -> t
-      val bShiftLeft   : width * t * t -> t
-*)
-    in
-    val _ = List.app bAnd BitwiseTests.bAndTests
-    val _ = List.app bOr BitwiseTests.bOrTests
-    val _ = List.app bXor BitwiseTests.bXorTests
-    val _ = List.app bNot BitwiseTests.bNotTests
-    end (* local *)
-  end (* TestBitwiseWrapping *)
+  end (* TestBitwiseArith *)
 
 structure TestSignedTrapping =
   struct
@@ -219,6 +174,10 @@ structure TestSignedTrapping =
       val mod' = check2 "mod" A.sMod
       val quot = check2 "quot" A.sQuot
       val rem = check2 "rem" A.sRem
+(*
+      val sShL : width * t * t -> t
+      val sShR : width * t * t -> t
+*)
       val neg = check1 "~" A.sNeg
       val abs = check1 "abs" A.sAbs
     in
@@ -242,6 +201,10 @@ structure TestSignedWrapping =
       val mod' = check2 "mod" A.sMod
       val quot = check2 "quot" A.sQuot
       val rem = check2 "rem" A.sRem
+(*
+      val sShL : width * t * t -> t
+      val sShR : width * t * t -> t
+*)
       val neg = check1 "~" A.sNeg
       val abs = check1 "abs" A.sAbs
     in
@@ -263,6 +226,10 @@ structure TestUnsignedTrapping =
       val mul = check2 "*" A.uMul
       val div' = check2 "div" A.uDiv
       val mod' = check2 "mod" A.uMod
+(*
+      val uShL : width * t * t -> t
+      val uShR : width * t * t -> t
+*)
       val neg = check1 "~" A.uNeg
     in
     val _ = List.app narrow [
@@ -384,6 +351,10 @@ structure TestUnsignedWrapping =
       val mul = check2 "*" A.uMul
       val div' = check2 "div" A.uDiv
       val mod' = check2 "mod" A.uMod
+(*
+      val uShL : width * t * t -> t
+      val uShR : width * t * t -> t
+*)
       val neg = check1 "~" A.uNeg
     in
     val _ = List.app narrow [

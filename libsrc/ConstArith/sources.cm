@@ -37,14 +37,13 @@ Library
   signature SIGNED_CONST_ARITH
   signature UNSIGNED_CONST_ARITH
 
-  structure BitwiseTrappingArith		(* bitwise operations with trapping semantics *)
-  structure BitwiseWrappingArith		(* bitwise operations with wrapping semantics *)
+  structure BitwiseConstArith		(* bitwise operations *)
 
-  structure SignedTrappingArith			(* signed operations with trapping semantics *)
-  structure SignedWrappingArith			(* signed operations with wrapping semantics *)
+  structure SignedTrappingArith		(* signed operations with trapping semantics *)
+  structure SignedWrappingArith		(* signed operations with wrapping semantics *)
 
-  structure UnsignedTrappingArith		(* unsigned operations with trapping semantics *)
-  structure UnsignedWrappingArith		(* unsigned operations with wrapping semantics *)
+  structure UnsignedTrappingArith	(* unsigned operations with trapping semantics *)
+  structure UnsignedWrappingArith	(* unsigned operations with wrapping semantics *)
 
 (* functor for gluing together different implementations into a single module that
  * implements the CONST_ARITH signature
@@ -53,6 +52,8 @@ Library
 
 (* functors for checking the arguments to the various operations *)
   functor CheckBitwiseArithFn
+  functor CheckSignedArithFn
+  functor CheckUnsignedArithFn
 
 is
 
@@ -60,8 +61,7 @@ is
   $/smlnj-lib.cm
 
   bitwise-const-arith-sig.sml
-  bitwise-trapping-arith.sml
-  bitwise-wrapping-arith.sml
+  bitwise-const-arith.sml
   check-bitwise-arith-fn.sml
   check-signed-arith-fn.sml
   check-unsigned-arith-fn.sml

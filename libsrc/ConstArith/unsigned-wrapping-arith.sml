@@ -58,4 +58,16 @@ structure UnsignedWrappingArith : UNSIGNED_CONST_ARITH =
 	    IntInf.andb(mask, IntInf.xorb(mask, a) + 1)
 	  end
 
+  (* unsigned left-shift operation. Shift amounts that are >= wid result in zero. *)
+    fun uShL (wid, a, b) =
+          if (b >= IntInf.fromInt wid)
+            then 0
+            else uNarrow (wid, IntInf.<<(a, Word.fromLargeInt b))
+
+  (* unsigned right-shift operation. Shift amounts that are >= wid result in zero. *)
+    fun uShR (wid, a, b) =
+          if (b >= IntInf.fromInt wid)
+            then 0
+            else uNarrow (wid, IntInf.~>>(a, Word.fromLargeInt b))
+
   end

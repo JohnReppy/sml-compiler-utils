@@ -29,8 +29,7 @@
 
 Library
 
-  structure TestBitwiseTrapping
-  structure TestBitwiseWrapping
+  structure TestBitwiseArith
 
   structure TestSignedTrapping
   structure TestSignedWrapping

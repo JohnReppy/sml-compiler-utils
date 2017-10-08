@@ -60,4 +60,14 @@ structure UnsignedTrappingArith : UNSIGNED_CONST_ARITH =
 	    IntInf.andb(mask, IntInf.xorb(mask, a) + 1)
 	  end
 
+  (* unsigned left-shift operation. *)
+    fun uShL (wid, a, b) =
+	  uNarrow (wid, IntInf.<<(a, Word.fromLargeInt(IntInf.min(b, IntInf.fromInt wid))))
+
+  (* unsigned right-shift operation. Shift amounts that are >= wid result in zero. *)
+    fun uShR (wid, a, b) =
+          if (b >= IntInf.fromInt wid)
+            then 0
+            else IntInf.~>>(a, Word.fromLargeInt b)
+
   end

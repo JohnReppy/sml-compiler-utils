@@ -42,8 +42,4 @@ signature BITWISE_CONST_ARITH =
     val bXor : width * t * t -> t
     val bNot : width * t -> t
 
-    val bLShiftRight : width * t * t -> t
-    val bAShiftRight : width * t * t -> t
-    val bShiftLeft   : width * t * t -> t
-
   end

@@ -51,23 +51,28 @@ functor CheckUnsignedArithFn (
     fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
     fun chkWid err w = if (w < 1) then err() else w
-    fun chkArg err (w, n) = if (n < 0) orelse (pow2 w <= n) then err() else n
+    fun chkArg err w = let
+          val limit = pow2 w
+          in
+	    fn n => if (n < 0) orelse (limit <= n) then err() else n
+	  end
 
     fun chk1 name f (w, arg) = let
 	  fun err () = error(concat[
 		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg, ")'"
 		])
 	  in
-	    f (chkWid err w, chkArg err arg)
+	    f (chkWid err w, chkArg err w arg)
 	  end
 
     fun chk2 name f (w, arg1, arg2) = let
 	  fun err () = error(concat[
-		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", "
+		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1, ", ",
 		  IntInf.toString arg2, ")'"
 		])
+	  val chkArg = chkArg err w
 	  in
-	    f (chkWid err w, chkArg err arg1, chkArg err arg2)
+	    f (chkWid err w, chkArg arg1, chkArg arg2)
 	  end
 
   (* narrow an unsigned value to the range 0..2^WID^-1; depending on the semantics
@@ -99,5 +104,19 @@ functor CheckUnsignedArithFn (
     val uDiv  = chk2 "uDiv" A.uDiv
     val uMod  = chk2 "uMod" A.uMod
     val uNeg  = chk1 "uNeg" A.uNeg
+
+    fun chkShift name f (w, arg, shft) = let
+	  fun err () = error(concat[
+		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg, ", ",
+		  IntInf.toString shft, ")'"
+		])
+	  in
+            if (shft < 0) orelse (pow2 w <= shft)
+              then err ()
+	      else f (chkWid err w, chkArg err w arg, shft)
+	  end
+
+    val uShL = chk2 "uShL" A.uShL
+    val uShR = chk2 "uShR" A.uShR
 
   end
