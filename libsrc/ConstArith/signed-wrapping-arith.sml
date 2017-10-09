@@ -36,19 +36,19 @@ structure SignedWrappingArith : SIGNED_CONST_ARITH =
 
     fun pow2 w = IntInf.<<(1, Word.fromInt w)
 
-  (* narrow the representation of n to `wid` bits.
+  (* narrow the representation of n to `wid` bits (2's complement).  This behaves
+   * like a C-style cast to a signed integer type.
    *)
-    fun sNarrow (wid, n) = let (* FIXME: this is implementing trapping!!! *)
-          val limit = pow2(wid - 1)
-          in
-	    if (n < ~limit) orelse (limit <= n)
-	      then raise Overflow
-              else n
+    fun sNarrow (wid, n) = let
+	  val limit = pow2 wid
+          val n = IntInf.andb(n, limit - 1)
+	  in
+	    if n < pow2(wid - 1) then n else n - limit
 	  end
 
     fun toSigned (wid, a) = if a < pow2(wid - 1)
 	  then a
-	  else IntInf.notb a + 1
+	  else a - pow2 wid
 
     fun sAdd (wid, a, b) = sNarrow (wid, a + b)
     fun sSub (wid, a, b) = sNarrow (wid, a - b)

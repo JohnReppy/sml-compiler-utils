@@ -37,6 +37,8 @@ Library
   structure TestUnsignedWrapping
   structure TestUnsignedTrapping
 
+  structure TestAll
+
 is
 
   $/basis.cm
