@@ -179,9 +179,93 @@ structure TestSignedTrapping =
       val sShR = check2 "sShR" A.sShR
       val neg = check1 "~" A.sNeg
       val abs = check1 "abs" A.sAbs
+      val OVFLW = OVFL_EXN
     in
-    fun test () = ()
+    fun test () = (
+	  List.app toSigned [
+	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
+	      (3, 4, INT ~4), (3, 5, INT ~3), (3, 6, INT ~2), (3, 7, INT ~1)
+	    ];
+          List.app add [
+	      (3, ~4, ~4, OVFLW),  (3, ~4, ~3, OVFLW),  (3, ~4, ~2, OVFLW),  (3, ~4, ~1, OVFLW),
+	      (3, ~4,  0, INT ~4), (3, ~4,  1, INT ~3), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~1),
+	      (3, ~3, ~4, OVFLW),  (3, ~3, ~3, OVFLW),  (3, ~3, ~2, OVFLW),  (3, ~3, ~1, INT ~4),
+	      (3, ~3,  0, INT ~3), (3, ~3,  1, INT ~2), (3, ~3,  2, INT ~1), (3, ~3,  3, INT  0),
+	      (3, ~2, ~4, OVFLW),  (3, ~2, ~3, OVFLW),  (3, ~2, ~2, INT ~4), (3, ~2, ~1, INT ~3),
+	      (3, ~2,  0, INT ~2), (3, ~2,  1, INT ~1), (3, ~2,  2, INT  0), (3, ~2,  3, INT  1),
+	      (3, ~1, ~4, OVFLW),  (3, ~1, ~3, INT ~4), (3, ~1, ~2, INT ~3), (3, ~1, ~1, INT ~2),
+	      (3, ~1,  0, INT ~1), (3, ~1,  1, INT  0), (3, ~1,  2, INT  1), (3, ~1,  3, INT  2),
+	      (3,  0, ~4, INT ~4), (3,  0, ~3, INT ~3), (3,  0, ~2, INT ~2), (3,  0, ~1, INT ~1),
+	      (3,  0,  0, INT  0), (3,  0,  1, INT  1), (3,  0,  2, INT  2), (3,  0,  3, INT  3),
+	      (3,  1, ~4, INT ~3), (3,  1, ~3, INT ~2), (3,  1, ~2, INT ~1), (3,  1, ~1, INT  0),
+	      (3,  1,  0, INT  1), (3,  1,  1, INT  2), (3,  1,  2, INT  3), (3,  1,  3, OVFLW),
+	      (3,  2, ~4, INT ~2), (3,  2, ~3, INT ~1), (3,  2, ~2, INT  0), (3,  2, ~1, INT  1),
+	      (3,  2,  0, INT  2), (3,  2,  1, INT  3), (3,  2,  2, OVFLW),  (3,  2,  3, OVFLW),
+	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT  0), (3,  3, ~2, INT  1), (3,  3, ~1, INT  2),
+	      (3,  3,  0, INT  3), (3,  3,  1, OVFLW),  (3,  3,  2, OVFLW),  (3,  3,  3, OVFLW)
+	    ];
+          List.app sub [
+	      (3, ~4, ~4, INT  0), (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT ~2), (3, ~4, ~1, INT ~3),
+	      (3, ~4,  0, INT ~4), (3, ~4,  1, OVFLW),  (3, ~4,  2, OVFLW),  (3, ~4,  3, OVFLW),
+	      (3, ~3, ~4, INT  1), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT ~2),
+	      (3, ~3,  0, INT ~3), (3, ~3,  1, INT ~4), (3, ~3,  2, OVFLW),  (3, ~3,  3, OVFLW),
+	      (3, ~2, ~4, INT  2), (3, ~2, ~3, INT  1), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT ~1),
+	      (3, ~2,  0, INT ~2), (3, ~2,  1, INT ~3), (3, ~2,  2, INT ~4), (3, ~2,  3, OVFLW),
+	      (3, ~1, ~4, INT  3), (3, ~1, ~3, INT  2), (3, ~1, ~2, INT  1), (3, ~1, ~1, INT  0),
+	      (3, ~1,  0, INT ~1), (3, ~1,  1, INT ~2), (3, ~1,  2, INT ~3), (3, ~1,  3, INT ~4),
+	      (3,  0, ~4, OVFLW),  (3,  0, ~3, INT  3), (3,  0, ~2, INT  2), (3,  0, ~1, INT  1),
+	      (3,  0,  0, INT  0), (3,  0,  1, INT ~1), (3,  0,  2, INT ~2), (3,  0,  3, INT ~3),
+	      (3,  1, ~4, OVFLW),  (3,  1, ~3, OVFLW),  (3,  1, ~2, INT  3), (3,  1, ~1, INT  2),
+	      (3,  1,  0, INT  1), (3,  1,  1, INT  0), (3,  1,  2, INT ~1), (3,  1,  3, INT ~2),
+	      (3,  2, ~4, OVFLW),  (3,  2, ~3, OVFLW),  (3,  2, ~2, OVFLW),  (3,  2, ~1, INT  3),
+	      (3,  2,  0, INT  2), (3,  2,  1, INT  1), (3,  2,  2, INT  0), (3,  2,  3, INT ~1),
+	      (3,  3, ~4, OVFLW),  (3,  3, ~3, OVFLW),  (3,  3, ~2, OVFLW),  (3,  3, ~1, OVFLW),
+	      (3,  3,  0, INT  3), (3,  3,  1, INT  2), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	    ];
+          List.app mul [
+	      (3, ~4, ~4, OVFLW),  (3, ~4, ~3, OVFLW),  (3, ~4, ~2, OVFLW),  (3, ~4, ~1, OVFLW),
+	      (3, ~4,  0, INT  0), (3, ~4,  1, INT ~4), (3, ~4,  2, OVFLW),  (3, ~4,  3, OVFLW),
+	      (3, ~3, ~4, OVFLW),  (3, ~3, ~3, OVFLW),  (3, ~3, ~2, OVFLW),  (3, ~3, ~1, INT  3),
+	      (3, ~3,  0, INT  0), (3, ~3,  1, INT ~3), (3, ~3,  2, OVFLW),  (3, ~3,  3, OVFLW),
+	      (3, ~2, ~4, OVFLW),  (3, ~2, ~3, OVFLW),  (3, ~2, ~2, OVFLW),  (3, ~2, ~1, INT  2),
+	      (3, ~2,  0, INT  0), (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~4), (3, ~2,  3, OVFLW),
+	      (3, ~1, ~4, OVFLW),  (3, ~1, ~3, INT  3), (3, ~1, ~2, INT  2), (3, ~1, ~1, INT  1),
+	      (3, ~1,  0, INT  0), (3, ~1,  1, INT ~1), (3, ~1,  2, INT ~2), (3, ~1,  3, INT ~3),
+	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
+	      (3,  0,  0, INT  0), (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
+	      (3,  1, ~4, INT ~4), (3,  1, ~3, INT ~3), (3,  1, ~2, INT ~2), (3,  1, ~1, INT ~1),
+	      (3,  1,  0, INT  0), (3,  1,  1, INT  1), (3,  1,  2, INT  2), (3,  1,  3, INT  3),
+	      (3,  2, ~4, OVFLW),  (3,  2, ~3, OVFLW),  (3,  2, ~2, INT ~4), (3,  2, ~1, INT ~2),
+	      (3,  2,  0, INT  0), (3,  2,  1, INT  2), (3,  2,  2, OVFLW),  (3,  2,  3, OVFLW),
+	      (3,  3, ~4, OVFLW),  (3,  3, ~3, OVFLW),  (3,  3, ~2, OVFLW),  (3,  3, ~1, INT ~3),
+	      (3,  3,  0, INT  0), (3,  3,  1, INT  3), (3,  3,  2, OVFLW),  (3,  3,  3, OVFLW)
+	    ];
+          List.app div' [
 (* TODO *)
+	    ];
+          List.app mod' [
+(* TODO *)
+	    ];
+          List.app quot [
+(* TODO *)
+	    ];
+          List.app rem [
+(* TODO *)
+	    ];
+          List.app sShL [
+(* TODO *)
+	    ];
+          List.app sShR [
+(* TODO *)
+	    ];
+	  List.app neg [
+	      (3, ~4, OVFLW),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
+	      (3,  0, INT  0), (3,  1, INT ~1), (3,  2, INT ~2), (3,  1, INT ~1)
+	    ];
+	  List.app abs [
+	      (3, ~4, OVFLW),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
+	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  1, INT  1)
+	    ])
     end (* local *)
   end (* TestSignedTrapping *)
 
@@ -246,6 +330,35 @@ structure TestSignedWrapping =
 	      (3,  2,  0, INT  2), (3,  2,  1, INT  1), (3,  2,  2, INT  0), (3,  2,  3, INT ~1),
 	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT ~2), (3,  3, ~2, INT ~3), (3,  3, ~1, INT ~4),
 	      (3,  3,  0, INT  3), (3,  3,  1, INT  2), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	    ];
+          List.app mul [
+(* TODO *)
+	    ];
+          List.app div' [
+(* TODO *)
+	    ];
+          List.app mod' [
+(* TODO *)
+	    ];
+          List.app quot [
+(* TODO *)
+	    ];
+          List.app rem [
+(* TODO *)
+	    ];
+          List.app sShL [
+(* TODO *)
+	    ];
+          List.app sShR [
+(* TODO *)
+	    ];
+	  List.app neg [
+	      (3, ~4, INT ~4),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
+	      (3,  0, INT  0), (3,  1, INT ~1), (3,  2, INT ~2), (3,  1, INT ~1)
+	    ];
+	  List.app abs [
+	      (3, ~4, INT ~4), (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
+	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  1, INT  1)
 	    ])
     end (* local *)
   end (* TestSignedWrapping *)
@@ -267,6 +380,7 @@ structure TestUnsignedTrapping =
       val uShL = check2 "uShL" A.uShL
       val uShR = check2 "uShR" A.uShR
       val neg = check1 "~" A.uNeg
+      val OVFLW = OVFL_EXN
     in
     fun test () = (
 	  List.app narrow [
@@ -281,35 +395,35 @@ structure TestUnsignedTrapping =
 	      (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
 	      (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
 	      (3, 1, 0, INT 1),   (3, 1, 1, INT 2),   (3, 1, 2, INT 3),   (3, 1, 3, INT 4),
-	      (3, 1, 4, INT 5),   (3, 1, 5, INT 6),   (3, 1, 6, INT 7),   (3, 1, 7, OVFL_EXN),
+	      (3, 1, 4, INT 5),   (3, 1, 5, INT 6),   (3, 1, 6, INT 7),   (3, 1, 7, OVFLW),
 	      (3, 2, 0, INT 2),   (3, 2, 1, INT 3),   (3, 2, 2, INT 4),   (3, 2, 3, INT 5),
-	      (3, 2, 4, INT 6),   (3, 2, 5, INT 7),   (3, 2, 6, OVFL_EXN), (3, 2, 7, OVFL_EXN),
+	      (3, 2, 4, INT 6),   (3, 2, 5, INT 7),   (3, 2, 6, OVFLW),   (3, 2, 7, OVFLW),
 	      (3, 3, 0, INT 3),   (3, 3, 1, INT 4),   (3, 3, 2, INT 5),   (3, 3, 3, INT 6),
-	      (3, 3, 4, INT 7),   (3, 3, 5, OVFL_EXN), (3, 3, 6, OVFL_EXN), (3, 3, 7, OVFL_EXN),
+	      (3, 3, 4, INT 7),   (3, 3, 5, OVFLW),   (3, 3, 6, OVFLW),   (3, 3, 7, OVFLW),
 	      (3, 4, 0, INT 4),   (3, 4, 1, INT 5),   (3, 4, 2, INT 6),   (3, 4, 3, INT 7),
-	      (3, 4, 4, OVFL_EXN), (3, 4, 5, OVFL_EXN), (3, 4, 6, OVFL_EXN), (3, 4, 7, OVFL_EXN),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 6),   (3, 5, 2, INT 7),   (3, 5, 3, OVFL_EXN),
-	      (3, 5, 4, OVFL_EXN), (3, 5, 5, OVFL_EXN), (3, 5, 6, OVFL_EXN), (3, 5, 7, OVFL_EXN),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 7),   (3, 6, 2, OVFL_EXN), (3, 6, 3, OVFL_EXN),
-	      (3, 6, 4, OVFL_EXN), (3, 6, 5, OVFL_EXN), (3, 6, 6, OVFL_EXN), (3, 6, 7, OVFL_EXN),
-	      (3, 7, 0, INT 7),   (3, 7, 1, OVFL_EXN), (3, 7, 2, OVFL_EXN), (3, 7, 3, OVFL_EXN),
-	      (3, 7, 4, OVFL_EXN), (3, 7, 5, OVFL_EXN), (3, 7, 6, OVFL_EXN), (3, 7, 7, OVFL_EXN)
+	      (3, 4, 4, OVFLW),   (3, 4, 5, OVFLW),   (3, 4, 6, OVFLW),   (3, 4, 7, OVFLW),
+	      (3, 5, 0, INT 5),   (3, 5, 1, INT 6),   (3, 5, 2, INT 7),   (3, 5, 3, OVFLW),
+	      (3, 5, 4, OVFLW),   (3, 5, 5, OVFLW),   (3, 5, 6, OVFLW),   (3, 5, 7, OVFLW),
+	      (3, 6, 0, INT 6),   (3, 6, 1, INT 7),   (3, 6, 2, OVFLW),   (3, 6, 3, OVFLW),
+	      (3, 6, 4, OVFLW),   (3, 6, 5, OVFLW),   (3, 6, 6, OVFLW),   (3, 6, 7, OVFLW),
+	      (3, 7, 0, INT 7),   (3, 7, 1, OVFLW),   (3, 7, 2, OVFLW),   (3, 7, 3, OVFLW),
+	      (3, 7, 4, OVFLW),   (3, 7, 5, OVFLW),   (3, 7, 6, OVFLW),   (3, 7, 7, OVFLW)
 	    ];
 	  List.app sub [
-	      (3, 0, 0, INT 0), (3, 0, 1, OVFL_EXN), (3, 0, 2, OVFL_EXN), (3, 0, 3, OVFL_EXN),
-	      (3, 0, 4, OVFL_EXN), (3, 0, 5, OVFL_EXN), (3, 0, 6, OVFL_EXN), (3, 0, 7, OVFL_EXN),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, OVFL_EXN), (3, 1, 3,OVFL_EXN),
-	      (3, 1, 4, OVFL_EXN), (3, 1, 5, OVFL_EXN), (3, 1, 6, OVFL_EXN), (3, 1, 7, OVFL_EXN),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 1),   (3, 2, 2, INT 0),   (3, 2, 3, OVFL_EXN),
-	      (3, 2, 4, OVFL_EXN), (3, 2, 5, OVFL_EXN), (3, 2, 6, OVFL_EXN), (3, 2, 7, OVFL_EXN),
+	      (3, 0, 0, INT 0),   (3, 0, 1, OVFLW),   (3, 0, 2, OVFLW),   (3, 0, 3, OVFLW),
+	      (3, 0, 4, OVFLW),   (3, 0, 5, OVFLW),   (3, 0, 6, OVFLW),   (3, 0, 7, OVFLW),
+	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, OVFLW),   (3, 1, 3,OVFLW),
+	      (3, 1, 4, OVFLW),   (3, 1, 5, OVFLW),   (3, 1, 6, OVFLW),   (3, 1, 7, OVFLW),
+	      (3, 2, 0, INT 2),   (3, 2, 1, INT 1),   (3, 2, 2, INT 0),   (3, 2, 3, OVFLW),
+	      (3, 2, 4, OVFLW),   (3, 2, 5, OVFLW),   (3, 2, 6, OVFLW),   (3, 2, 7, OVFLW),
 	      (3, 3, 0, INT 3),   (3, 3, 1, INT 2),   (3, 3, 2, INT 1),   (3, 3, 3, INT 0),
-	      (3, 3, 4, OVFL_EXN), (3, 3, 5, OVFL_EXN), (3, 3, 6, OVFL_EXN), (3, 3, 7, OVFL_EXN),
+	      (3, 3, 4, OVFLW),   (3, 3, 5, OVFLW),   (3, 3, 6, OVFLW),   (3, 3, 7, OVFLW),
 	      (3, 4, 0, INT 4),   (3, 4, 1, INT 3),   (3, 4, 2, INT 2),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 0),   (3, 4, 5, OVFL_EXN), (3, 4, 6, OVFL_EXN),(3, 4, 7, OVFL_EXN),
+	      (3, 4, 4, INT 0),   (3, 4, 5, OVFLW),   (3, 4, 6, OVFLW),   (3, 4, 7, OVFLW),
 	      (3, 5, 0, INT 5),   (3, 5, 1, INT 4),   (3, 5, 2, INT 3),   (3, 5, 3, INT 2),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, OVFL_EXN),(3, 5, 7, OVFL_EXN),
+	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, OVFLW),   (3, 5, 7, OVFLW),
 	      (3, 6, 0, INT 6),   (3, 6, 1, INT 5),   (3, 6, 2, INT 4),   (3, 6, 3, INT 3),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, OVFL_EXN),
+	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, OVFLW),
 	      (3, 7, 0, INT 7),   (3, 7, 1, INT 6),   (3, 7, 2, INT 5),   (3, 7, 3, INT 4),
 	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
 	    ];
@@ -319,17 +433,17 @@ structure TestUnsignedTrapping =
 	      (3, 1, 0, INT 0),   (3, 1, 1, INT 1),   (3, 1, 2, INT 2),   (3, 1, 3, INT 3),
 	      (3, 1, 4, INT 4),   (3, 1, 5, INT 5),   (3, 1, 6, INT 6),   (3, 1, 7, INT 7),
 	      (3, 2, 0, INT 0),   (3, 2, 1, INT 2),   (3, 2, 2, INT 4),   (3, 2, 3, INT 6),
-	      (3, 2, 4, OVFL_EXN), (3, 2, 5, OVFL_EXN), (3, 2, 6, OVFL_EXN), (3, 2, 7, OVFL_EXN),
-	      (3, 3, 0, INT 0),   (3, 3, 1, INT 3),   (3, 3, 2, INT 6),   (3, 3, 3, OVFL_EXN),
-	      (3, 3, 4, OVFL_EXN), (3, 3, 5, OVFL_EXN), (3, 3, 6, OVFL_EXN), (3, 3, 7, OVFL_EXN),
-	      (3, 4, 0, INT 0),   (3, 4, 1, INT 4),   (3, 4, 2, OVFL_EXN), (3, 4, 3, OVFL_EXN),
-	      (3, 4, 4, OVFL_EXN), (3, 4, 5, OVFL_EXN), (3, 4, 6, OVFL_EXN), (3, 4, 7, OVFL_EXN),
-	      (3, 5, 0, INT 0),   (3, 5, 1, INT 5),   (3, 5, 2, OVFL_EXN), (3, 5, 3, OVFL_EXN),
-	      (3, 5, 4, OVFL_EXN), (3, 5, 5, OVFL_EXN), (3, 5, 6, OVFL_EXN), (3, 5, 7, OVFL_EXN),
-	      (3, 6, 0, INT 0),   (3, 6, 1, INT 6),   (3, 6, 2, OVFL_EXN), (3, 6, 3, OVFL_EXN),
-	      (3, 6, 4, OVFL_EXN), (3, 6, 5, OVFL_EXN), (3, 6, 6, OVFL_EXN), (3, 6, 7, OVFL_EXN),
-	      (3, 7, 0, INT 0),   (3, 7, 1, INT 7),   (3, 7, 2, OVFL_EXN),(3, 7, 3, OVFL_EXN),
-	      (3, 7, 4, OVFL_EXN),(3, 7, 5, OVFL_EXN),(3, 7, 6, OVFL_EXN),(3, 7, 7, OVFL_EXN)
+	      (3, 2, 4, OVFLW),   (3, 2, 5, OVFLW),   (3, 2, 6, OVFLW),   (3, 2, 7, OVFLW),
+	      (3, 3, 0, INT 0),   (3, 3, 1, INT 3),   (3, 3, 2, INT 6),   (3, 3, 3, OVFLW),
+	      (3, 3, 4, OVFLW),   (3, 3, 5, OVFLW),   (3, 3, 6, OVFLW),   (3, 3, 7, OVFLW),
+	      (3, 4, 0, INT 0),   (3, 4, 1, INT 4),   (3, 4, 2, OVFLW),   (3, 4, 3, OVFLW),
+	      (3, 4, 4, OVFLW),   (3, 4, 5, OVFLW),   (3, 4, 6, OVFLW),   (3, 4, 7, OVFLW),
+	      (3, 5, 0, INT 0),   (3, 5, 1, INT 5),   (3, 5, 2, OVFLW),   (3, 5, 3, OVFLW),
+	      (3, 5, 4, OVFLW),   (3, 5, 5, OVFLW),   (3, 5, 6, OVFLW),   (3, 5, 7, OVFLW),
+	      (3, 6, 0, INT 0),   (3, 6, 1, INT 6),   (3, 6, 2, OVFLW),   (3, 6, 3, OVFLW),
+	      (3, 6, 4, OVFLW),   (3, 6, 5, OVFLW),   (3, 6, 6, OVFLW),   (3, 6, 7, OVFLW),
+	      (3, 7, 0, INT 0),   (3, 7, 1, INT 7),   (3, 7, 2, OVFLW),   (3, 7, 3, OVFLW),
+	      (3, 7, 4, OVFLW),   (3, 7, 5, OVFLW),   (3, 7, 6, OVFLW),   (3, 7, 7, OVFLW)
 	    ];
 	  List.app div' [
 	      (3, 0, 0, DIV_EXN), (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
@@ -508,7 +622,9 @@ structure TestAll =
 	  TestUnsignedTrapping.test();
 	  TestUnsignedWrapping.test())
 
+(*
     val _ = test()
+*)
 
   end;
 

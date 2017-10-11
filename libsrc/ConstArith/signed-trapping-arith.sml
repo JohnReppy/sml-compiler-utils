@@ -49,7 +49,7 @@ structure SignedTrappingArith : SIGNED_CONST_ARITH =
 
     fun toSigned (wid, a) = if a < pow2(wid - 1)
 	  then a
-	  else IntInf.notb a + 1
+	  else a - pow2 wid
 
     fun sAdd (wid, a, b) = sNarrow (wid, a + b)
     fun sSub (wid, a, b) = sNarrow (wid, a - b)
