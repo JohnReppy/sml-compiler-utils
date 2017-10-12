@@ -55,9 +55,11 @@ structure SignedTrappingArith : SIGNED_CONST_ARITH =
     fun sSub (wid, a, b) = sNarrow (wid, a - b)
     fun sMul (wid, a, b) = sNarrow (wid, a * b)
     fun sDiv (wid, a, b) = sNarrow (wid, a div b)
-    fun sMod (wid, a, b) = sNarrow (wid, a mod b)
+    fun sMod (_, 0, 0) = raise Div (* workaround for bug in SML/NJ pre 110.82 *)
+      | sMod (wid, a, b) = sNarrow (wid, a mod b)
     fun sQuot (wid, a, b) = sNarrow (wid, IntInf.quot(a, b))
-    fun sRem (wid, a, b) = sNarrow (wid, IntInf.mod(a, b))
+    fun sRem (_, 0, 0) = raise Div (* workaround for bug in SML/NJ pre 110.82 *)
+      | sRem (wid, a, b) = sNarrow (wid, IntInf.rem(a, b))
     fun sNeg (wid, a) = sNarrow (wid, ~a)
     fun sAbs (wid, a) = if (a < 0) then sNarrow (wid, ~a) else a
 
