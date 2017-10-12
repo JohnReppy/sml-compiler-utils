@@ -180,8 +180,12 @@ structure TestSignedTrapping =
       val neg = check1 "~" A.sNeg
       val abs = check1 "abs" A.sAbs
       val OVFLW = OVFL_EXN
+      val DIVZ = DIV_EXN
     in
     fun test () = (
+	  List.app narrow [
+(* TODO *)
+	    ];
 	  List.app toSigned [
 	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
 	      (3, 4, INT ~4), (3, 5, INT ~3), (3, 6, INT ~2), (3, 7, INT ~1)
@@ -241,13 +245,43 @@ structure TestSignedTrapping =
 	      (3,  3,  0, INT  0), (3,  3,  1, INT  3), (3,  3,  2, OVFLW),  (3,  3,  3, OVFLW)
 	    ];
           List.app div' [
-(* TODO *)
+	      (3, ~4, ~4, INT 1),  (3, ~4, ~3, INT 1),  (3, ~4, ~2, INT 2),  (3, ~4, ~1, OVFLW),
+	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT ~4), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~2),
+	      (3, ~3, ~4, INT 0),  (3, ~3, ~3, INT  1), (3, ~3, ~2, INT  1), (3, ~3, ~1, INT  3),
+	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT ~3), (3, ~3,  2, INT ~2), (3, ~3,  3, INT ~1),
+	      (3, ~2, ~4, INT 0),  (3, ~2, ~3, INT  0), (3, ~2, ~2, INT  1), (3, ~2, ~1, INT  2),
+	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~1), (3, ~2,  3, INT ~1),
+	      (3, ~1, ~4, INT  0), (3, ~1, ~3, INT  0), (3, ~1, ~2, INT  0), (3, ~1, ~1, INT  1),
+	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT ~1), (3, ~1,  2, INT ~1), (3, ~1,  3, INT ~1),
+	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
+	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
+	      (3,  1, ~4, INT ~1), (3,  1, ~3, INT ~1), (3,  1, ~2, INT ~1), (3,  1, ~1, INT ~1),
+	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  1), (3,  1,  2, INT  0), (3,  1,  3, INT  0),
+	      (3,  2, ~4, INT ~1), (3,  2, ~3, INT ~1), (3,  2, ~2, INT ~1), (3,  2, ~1, INT ~2),
+	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  2), (3,  2,  2, INT  1), (3,  2,  3, INT  0),
+	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT ~1), (3,  3, ~2, INT ~2), (3,  3, ~1, INT ~3),
+	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  3), (3,  3,  2, INT  1), (3,  3,  3, INT  1)
 	    ];
           List.app mod' [
 (* TODO *)
 	    ];
           List.app quot [
-(* TODO *)
+	      (3, ~4, ~4, INT 1),  (3, ~4, ~3, INT 1),  (3, ~4, ~2, INT 2),  (3, ~4, ~1, OVFLW),
+	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT ~4), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~1),
+	      (3, ~3, ~4, INT 0),  (3, ~3, ~3, INT  1), (3, ~3, ~2, INT  1), (3, ~3, ~1, INT  3),
+	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT ~3), (3, ~3,  2, INT ~1), (3, ~3,  3, INT ~1),
+	      (3, ~2, ~4, INT 0),  (3, ~2, ~3, INT  0), (3, ~2, ~2, INT  1), (3, ~2, ~1, INT  2),
+	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~1), (3, ~2,  3, INT  0),
+	      (3, ~1, ~4, INT  0), (3, ~1, ~3, INT  0), (3, ~1, ~2, INT  0), (3, ~1, ~1, INT  1),
+	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT ~1), (3, ~1,  2, INT  0), (3, ~1,  3, INT  0),
+	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
+	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
+	      (3,  1, ~4, INT  0), (3,  1, ~3, INT  0), (3,  1, ~2, INT  0), (3,  1, ~1, INT ~1),
+	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  1), (3,  1,  2, INT  0), (3,  1,  3, INT  0),
+	      (3,  2, ~4, INT  0), (3,  2, ~3, INT  0), (3,  2, ~2, INT ~1), (3,  2, ~1, INT ~2),
+	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  2), (3,  2,  2, INT  1), (3,  2,  3, INT  0),
+	      (3,  3, ~4, INT  0), (3,  3, ~3, INT ~1), (3,  3, ~2, INT ~1), (3,  3, ~1, INT ~3),
+	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  3), (3,  3,  2, INT  1), (3,  3,  3, INT  1)
 	    ];
           List.app rem [
 (* TODO *)
@@ -291,6 +325,9 @@ structure TestSignedWrapping =
       val abs = check1 "abs" A.sAbs
     in
     fun test () = (
+	  List.app narrow [
+(* TODO *)
+	    ];
 	  List.app toSigned [
 	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
 	      (3, 4, INT ~4), (3, 5, INT ~3), (3, 6, INT ~2), (3, 7, INT ~1)
