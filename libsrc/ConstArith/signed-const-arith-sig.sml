@@ -39,7 +39,7 @@ signature SIGNED_CONST_ARITH =
 
   (* narrow a signed-constant to fit within the range -2^(WID-1)^..2^(WID-1)^-1.
    * Depending on the semantics structure implementing this signature, this operation
-   * may raise Overflow on values that are outside the range -2^(WID-1)^..pow2^(WID-1)^.
+   * may raise Overflow on values that are outside the range -2^(WID-1)^..2^(WID-1)^.
    *)
     val sNarrow : width * t -> t
 

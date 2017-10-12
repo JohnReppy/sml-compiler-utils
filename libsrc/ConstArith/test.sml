@@ -184,7 +184,10 @@ structure TestSignedTrapping =
     in
     fun test () = (
 	  List.app narrow [
-(* TODO *)
+	      (3, ~8, OVFLW),  (3, ~7, OVFLW),  (3, ~6, OVFLW),  (3, ~5, OVFLW),
+	      (3, ~4, INT ~4), (3, ~3, INT ~3), (3, ~2, INT ~2), (3, ~1, INT ~1),
+	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  3, INT  3),
+	      (3,  4, OVFLW),  (3,  5, OVFLW),  (3,  6, OVFLW),  (3,  7, OVFLW)
 	    ];
 	  List.app toSigned [
 	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
@@ -317,10 +320,24 @@ structure TestSignedTrapping =
 	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  0), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
 	    ];
           List.app sShL [
-(* TODO *)
+              (3, ~4, 0, INT ~4),  (3, ~4, 1, OVFLW),   (3, ~4, 2, OVFLW),   (3, ~4, 3, OVFLW),
+              (3, ~3, 0, INT ~3),  (3, ~3, 1, OVFLW),   (3, ~3, 2, OVFLW),   (3, ~3, 3, OVFLW),
+              (3, ~2, 0, INT ~2),  (3, ~2, 1, INT ~4),  (3, ~2, 2, OVFLW),   (3, ~2, 3, OVFLW),
+              (3, ~1, 0, INT ~1),  (3, ~1, 1, INT ~2),  (3, ~1, 2, INT ~4),  (3, ~1, 3, OVFLW),
+              (3,  0, 0, INT  0),  (3,  0, 1, INT  0),  (3,  0, 2, INT  0),  (3,  0, 3, INT  0),
+              (3,  1, 0, INT  1),  (3,  1, 1, INT  2),  (3,  1, 2, OVFLW),   (3,  1, 3, OVFLW),
+              (3,  2, 0, INT  2),  (3,  2, 1, OVFLW),   (3,  2, 2, OVFLW),   (3,  2, 3, OVFLW),
+              (3,  3, 0, INT  3),  (3,  3, 1, OVFLW),   (3,  3, 2, OVFLW),   (3,  3, 3, OVFLW)
 	    ];
           List.app sShR [
-(* TODO *)
+              (3, ~4, 0, INT ~4),  (3, ~4, 1, INT ~2),  (3, ~4, 2, INT ~1),  (3, ~4, 3, INT ~1),
+              (3, ~3, 0, INT ~3),  (3, ~3, 1, INT ~2),  (3, ~3, 2, INT ~1),  (3, ~3, 3, INT ~1),
+              (3, ~2, 0, INT ~2),  (3, ~2, 1, INT ~1),  (3, ~2, 2, INT ~1),  (3, ~2, 3, INT ~1),
+              (3, ~1, 0, INT ~1),  (3, ~1, 1, INT ~1),  (3, ~1, 2, INT ~1),  (3, ~1, 3, INT ~1),
+              (3,  0, 0, INT  0),  (3,  0, 1, INT  0),  (3,  0, 2, INT  0),  (3,  0, 3, INT  0),
+              (3,  1, 0, INT  1),  (3,  1, 1, INT  0),  (3,  1, 2, INT  0),  (3,  1, 3, INT  0),
+              (3,  2, 0, INT  2),  (3,  2, 1, INT  1),  (3,  2, 2, INT  0),  (3,  2, 3, INT  0),
+              (3,  3, 0, INT  3),  (3,  3, 1, INT  1),  (3,  3, 2, INT  0),  (3,  3, 3, INT  0)
 	    ];
 	  List.app neg [
 	      (3, ~4, OVFLW),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
@@ -548,6 +565,12 @@ structure TestUnsignedTrapping =
 	      (3, 7, 0, DIV_EXN), (3, 7, 1, INT 0),   (3, 7, 2, INT 1),   (3, 7, 3, INT 1),
 	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
 	    ];
+          List.app uShL [
+(* TODO *)
+	    ];
+          List.app uShR [
+(* TODO *)
+	    ];
 	  List.app neg [
 	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
 	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
@@ -671,6 +694,12 @@ structure TestUnsignedWrapping =
 	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, INT 6),
 	      (3, 7, 0, DIV_EXN), (3, 7, 1, INT 0),   (3, 7, 2, INT 1),   (3, 7, 3, INT 1),
 	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
+	    ];
+          List.app uShL [
+(* TODO *)
+	    ];
+          List.app uShR [
+(* TODO *)
 	    ];
 	  List.app neg [
 	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),

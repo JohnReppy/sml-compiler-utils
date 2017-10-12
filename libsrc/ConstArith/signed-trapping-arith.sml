@@ -64,9 +64,10 @@ structure SignedTrappingArith : SIGNED_CONST_ARITH =
     fun sAbs (wid, a) = if (a < 0) then sNarrow (wid, ~a) else a
 
   (* signed left-shift operation. *)
-    fun sShL (wid, a, b) =
+    fun sShL (wid, 0, _) = 0
+      | sShL (wid, a, b) =
           if (b >= IntInf.fromInt wid)
-            then 0
+            then raise Overflow
             else sNarrow (wid, IntInf.<<(a, Word.fromLargeInt b))
 
   (* signed right-shift operation. Shift amounts that are >= wid result in zero. *)
