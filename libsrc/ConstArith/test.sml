@@ -373,7 +373,10 @@ structure TestSignedWrapping =
     in
     fun test () = (
 	  List.app narrow [
-(* TODO *)
+	      (3, ~8, OVFLW),  (3, ~7, OVFLW),  (3, ~6, OVFLW),  (3, ~5, OVFLW),
+	      (3, ~4, INT ~4), (3, ~3, INT ~3), (3, ~2, INT ~2), (3, ~1, INT ~1),
+	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  3, INT  3),
+	      (3,  4, OVFLW),  (3,  5, OVFLW),  (3,  6, OVFLW),  (3,  7, OVFLW)
 	    ];
 	  List.app toSigned [
 	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
