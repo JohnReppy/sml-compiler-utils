@@ -1,6 +1,7 @@
-(* sources.cm
+(* float-to-bits-fn.sml
  *
- * CM file to build float code on SML/NJ.
+ * This code was derived from the RealConst functor in the SML/NJ sources
+ * (base/compiler/MiscUtil/bignums/realconst.sml).
  *
  * COPYRIGHT (c) 2018 John Reppy (http://cs.uchicago.edu/~jhr)
  *
@@ -27,32 +28,27 @@
  *      https://github.com/JohnReppy/sml-compiler-utils
  *)
 
-Library
+signature FLOAT_TO_BITS =
+  sig
 
-  signature FLOAT_TO_BITS
-  signature IEEE_FLOAT_PARAMS
+  (* the number of bits in the representation *)
+    val width : int
 
-  structure FloatLit
-  structure Float16ToLLVM
-  structure Float32ToLLVM
-  structure FloatToLLVMIR
+  (* convert a floating-point literal to its IEEE binary representation; we also
+   * return the IEEE classification of the value.  The resulting vector is in
+   * big-endian layout (i.e., the sign bit will be the MSB of the first byte).
+   * This function raises the Overflow exception when the literal is too large
+   * to represent.
+   *)
+    val toBits : FloatLit.t -> Word8Vector.vector * IEEEReal.float_class
 
-  functor FloatToBitsFn
+(*
+    val fromBits : Word8Vector.vector -> FloatLit.t
+*)
 
-  structure IEEEFloat16Params
-  structure IEEEFloat32Params
-  structure IEEEFloat64Params
-  structure IEEEFloat128Params
-  structure IEEEFloat256Params
+    val zero : Word8Vector.vector
+    val negInf : Word8Vector.vector
+    val posInf : Word8Vector.vector
+    val quietNaN : Word8Vector.vector
 
-is
-
-  $/basis.cm
-  $/smlnj-lib.cm
-
-  float-lit.sml
-  float-to-bits-fn.sml
-  float-to-bits-sig.sml
-  float-to-llvm-ir.sml
-  float16-to-llvm.sml
-  float32-to-llvm.sml
+  end

@@ -3,7 +3,7 @@
  * Test cases for converting float literals to IEEE double-precision floats (64-bit)
  * See http://www.binaryconvert.com/result_double.html for an online converter.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2018 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
