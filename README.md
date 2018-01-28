@@ -21,8 +21,8 @@ utility modules, and `tools`, which contains some code generation tools.
 
 * Errors -- error tracking for [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
 
-* Floats -- A representation of floating-point literals plus support for converting
-    to IEEE binary representations.
+* [Floats](libsrc/Floats/README.md) -- A representation of floating-point
+    literals plus support for converting to IEEE binary representations.
 
 * Logging -- Utility code for log messages and for timing compiler phases
 
