@@ -1,4 +1,4 @@
-(* float-to-bits-fn.sml
+(* float-to-bits-sig.sml
  *
  * This code was derived from the RealConst functor in the SML/NJ sources
  * (base/compiler/MiscUtil/bignums/realconst.sml).
