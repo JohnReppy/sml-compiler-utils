@@ -333,7 +333,7 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) : FLOAT_TO_BITS =
                       fun doDigit (d, (m, e)) = (IntInf.fromInt d + 10*m, e-1)
                       val (frac, exp) = List.foldl doDigit (0, exp) digits
                       in
-                        (frac, exp)
+                        (frac, IntInf.toInt exp)
                       end
               (* convert to base 2 *)
                 val flt = raiseToPower (round({frac=frac_10, exp=0}, precision), exp_10)

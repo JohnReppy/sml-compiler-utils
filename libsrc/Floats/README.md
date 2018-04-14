@@ -10,6 +10,7 @@ that are compatible with the LLVM IR.
 ### Roadmap
 
 * `README.md` -- this file
+* `float-constants.sml` -- floating-point literals for special constants from `math.h`
 * `float-lit.sml` -- the `FloatLit` structure
 * `float-to-bits-fn.sml` -- includes the `FloatToBitsFn` functor, as well
     as the `IEEE_FLOAT_PARAMS` signature its instances
