@@ -326,7 +326,7 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) : FLOAT_TO_BITS =
            of FloatLit.PosInf => (posInf, IEEEReal.INF)
             | FloatLit.NegInf => (negInf, IEEEReal.INF)
             | FloatLit.QNaN => (quietNaN, IEEEReal.NAN IEEEReal.QUIET)
-            | FloatLit.Flt{isNeg, digits=[0], exp} => (pack(isNeg, 0w0, 0), IEEEReal.ZERO)
+            | FloatLit.Flt{isNeg, digits=[], exp} => (pack(isNeg, 0w0, 0), IEEEReal.ZERO)
             | FloatLit.Flt{isNeg, digits, exp} => let
               (* convert the digits to a IntInf.int and adjust the exponent *)
                 val (frac_10, exp_10) = let

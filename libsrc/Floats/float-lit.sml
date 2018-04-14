@@ -71,9 +71,7 @@ structure FloatLit :> sig
    *)
     val float : {isNeg : bool, whole : string, frac : string, exp : IntInf.int} -> t
 
-  (* create a floating-point literal from a sign, decimal fraction, and exponent.
-   * Note that we assume that there are *no* trailing zeros in the digit list.
-   *)
+  (* create a floating-point literal from a sign, decimal fraction, and exponent *)
     val fromDigits : {isNeg : bool, digits : int list, exp : IntInf.int} -> t
 
   (* create a floating-point literal from an integer *)
@@ -255,15 +253,15 @@ structure FloatLit :> sig
     fun stripZeros {isNeg, digits, exp} = let
           fun strip [] = []
             | strip (0::ds) = (case strip ds
-		 of [] => []
-		  | ds => 0::ds
-		(* end case *))
+                 of [] => []
+                  | ds => 0::ds
+                (* end case *))
             | strip (d::ds) = d :: strip ds
           in
             case strip digits
-	     of [] => zero isNeg
+             of [] => zero isNeg
               | digits => Flt{isNeg=isNeg, digits=digits, exp=exp}
-	    (* end case *)
+            (* end case *)
           end
 
   (* create a floating-point literal from a sign, decimal fraction, and exponent *)
@@ -290,10 +288,10 @@ structure FloatLit :> sig
           val digits = toDigits(n, [])
           in
             stripZeros {
-		isNeg = isNeg,
-		digits = digits,
-		exp = IntInf.fromInt(List.length digits)
-	      }
+                isNeg = isNeg,
+                digits = digits,
+                exp = IntInf.fromInt(List.length digits)
+              }
           end
 
     fun toString PosInf = "+inf"
@@ -338,7 +336,7 @@ structure FloatLit :> sig
           val digits = List.map Word8.fromInt digits
           val exp' = W.fromLargeInt exp
           fun byte i = Word8.fromLargeWord(W.toLargeWord((W.>>(exp', 0w8*i))))
-          val exp = [byte 0w0, byte 0w1, byte 0w2, byte 0w3]
+          val exp = [byte 0w3, byte 0w2, byte 0w1, byte 0w0]
           in
             Word8Vector.fromList(sign :: (digits @ exp))
           end
@@ -356,16 +354,19 @@ structure FloatLit :> sig
                 (* end case *))
               else let
                 val ndigits = W8V.length v - 5
-                val _ = if (ndigits < 1) then error() else ()
+                val _ = if (ndigits < 0) then error() else ()
                 val isNeg = (case W8V.sub(v, 0)
                        of 0w0 => false
                         | 0w1 => true
                         | _ => error()
                       (* end case *))
-                fun digit i = Word8.toInt(W8V.sub(v, i+1))
+                fun digit i = let val d = Word8.toInt(W8V.sub(v, i+1))
+                      in
+                        if (d < 10) then d else error()
+                      end
                 fun byte i = W.<<(
                       W.fromLargeWord(Word8.toLargeWord(W8V.sub(v, ndigits+1+i))),
-                      W.fromInt(8*i))
+                      W.fromInt(8*(3-i)))
                 val exp = W.toLargeIntX(W.orb(byte 3, W.orb(byte 2, W.orb(byte 1, byte 0))))
                 in
                   Flt{isNeg = isNeg, digits = List.tabulate(ndigits, digit), exp = exp}
