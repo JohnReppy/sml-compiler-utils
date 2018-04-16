@@ -19,7 +19,8 @@ utility modules, and `tools`, which contains some code generation tools.
 * [Constant arithemetic](libsrc/ConstArith/README.md) -- Infrastructure for
     constant-folding integer arithmetic at different precisions.
 
-* Errors -- error tracking for [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
+* [Errors](libsrc/Errors/README.md) -- error tracking for
+    [ML-LPT](http://smlnj.org/doc/ml-lpt/manual.pdf) based parsers
 
 * [Floats](libsrc/Floats/README.md) -- A representation of floating-point
     literals plus support for converting to IEEE binary representations.

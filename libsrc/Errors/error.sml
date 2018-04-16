@@ -41,7 +41,7 @@ structure Error :> sig
 
     type err_stream
 
-  (* make an error stream. *)
+  (* `mkErrStream file` make an error stream for the specified file *)
     val mkErrStream : string -> err_stream
 
     val anyErrors : err_stream -> bool
@@ -70,7 +70,9 @@ structure Error :> sig
   (* print the errors to an output stream *)
     val report : TextIO.outstream * err_stream -> unit
 
-  (* source-code locations *)
+  (* source-code locations: these are either unknown or specify an interval
+   * in a source file.
+   *)
     datatype location
       = UNKNOWN
       | LOC of {file : string, l1 : int, c1 : int, l2 : int, c2 : int}
