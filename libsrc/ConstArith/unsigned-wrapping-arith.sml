@@ -53,10 +53,10 @@ structure UnsignedWrappingArith : UNSIGNED_CONST_ARITH =
 
   (* 2's complement of unsigned argument as unsigned value *)
     fun uNeg (wid, a) = let
-	  val mask = pow2 wid - 1
-	  in
-	    IntInf.andb(mask, IntInf.xorb(mask, a) + 1)
-	  end
+          val mask = pow2 wid - 1
+          in
+            IntInf.andb(mask, IntInf.xorb(mask, a) + 1)
+          end
 
   (* unsigned left-shift operation. Shift amounts that are >= wid result in zero. *)
     fun uShL (wid, a, b) =
