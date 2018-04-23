@@ -63,6 +63,19 @@ structure TestUtil =
 	  end
 	    handle ex => EXN ex
 
+    fun eval' f arg = BOOL(f arg)
+	  handle Overflow => OVFL_EXN
+	       | Div => DIV_EXN
+
+    fun checkApp' f arg expected = let
+	  val res = eval' f arg
+	  in
+	    if (expected = res)
+	      then OK
+	      else BAD{expected = expected, actual = res}
+	  end
+	    handle ex => EXN ex
+
     fun pr msg = (
 	  TextIO.output(TextIO.stdOut, concat msg);
 	  TextIO.flushOut TextIO.stdOut)
@@ -81,6 +94,15 @@ structure TestUtil =
 		  IntInf.toString arg1, " ", funId, " ", IntInf.toString arg2
 		]),
 	      " == ", valueToString res, " ", resultToString(checkApp f (w, arg1, arg2) res), "\n"
+	    ]
+
+    fun checkCmp strId funId (f : int * IntInf.int * IntInf.int -> bool) (w, arg1, arg2, res) =
+	  pr [
+	      StringCvt.padRight #" " 31 (strId ^ ":"), " ",
+	      StringCvt.padLeft #" " 10 (concat[
+		  IntInf.toString arg1, " ", funId, " ", IntInf.toString arg2
+		]),
+	      " == ", valueToString res, " ", resultToString(checkApp' f (w, arg1, arg2) res), "\n"
 	    ]
 
   end; (* TestUtil *)
@@ -547,6 +569,7 @@ structure TestUnsignedTrapping =
       structure A = UnsignedTrappingArith
       val check1 = TestUtil.check1 "UnsignedTrappingArith"
       val check2 = TestUtil.check2 "UnsignedTrappingArith"
+      val checkCmp = TestUtil.checkCmp "UnsignedTrappingArith"
       val narrow = check1 "uNarrow" A.uNarrow
       val toUnsigned = check1 "toUnsigned" A.toUnsigned
       val add = check2 "+" A.uAdd
@@ -557,8 +580,12 @@ structure TestUnsignedTrapping =
       val uShL = check2 "uShL" A.uShL
       val uShR = check2 "uShR" A.uShR
       val neg = check1 "~" A.uNeg
+      val less = checkCmp "<" A.uLess
+      val lessEq = checkCmp "<=" A.uLessEq
       val OVFLW = OVFL_EXN
       val DIVZ = DIV_EXN
+      val TRUE = BOOL true
+      val FALS = BOOL false
     in
     fun test () = (
 	  List.app narrow [
@@ -682,6 +709,50 @@ structure TestUnsignedTrapping =
 	  List.app neg [
 	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
 	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
+	    ];
+	  List.app less [
+	      (3, ~4, ~4, FALS), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
+	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+	      (3, ~3, ~4, FALS), (3, ~3, ~3, FALS), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
+	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+	      (3, 0, 0, FALS),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
+	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
+	      (3, 1, 0, FALS),   (3, 1, 1, FALS),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
+	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
+	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, FALS),   (3, 2, 3, TRUE),
+	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
+	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, FALS),
+	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
+	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
+	      (3, 4, 4, FALS),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
+	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
+	      (3, 5, 4, FALS),   (3, 5, 5, FALS),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
+	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
+	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, FALS),   (3, 6, 7, TRUE),
+	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
+	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, FALS)
+	    ];
+	  List.app lessEq [
+	      (3, ~4, ~4, TRUE), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
+	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
+	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+	      (3, 0, 0, TRUE),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
+	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
+	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
+	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
+	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, TRUE),
+	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
+	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
+	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
+	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
+	      (3, 4, 4, TRUE),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
+	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
+	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
+	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
+	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, TRUE),
+	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
+	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
 	    ])
     end (* local *)
   end (* TestUnsignedTrapping *)
@@ -693,6 +764,7 @@ structure TestUnsignedWrapping =
       structure A = UnsignedWrappingArith
       val check1 = TestUtil.check1 "UnsignedWrappingArith"
       val check2 = TestUtil.check2 "UnsignedWrappingArith"
+      val checkCmp = TestUtil.checkCmp "UnsignedWrappingArith"
       val narrow = check1 "uNarrow" A.uNarrow
       val toUnsigned = check1 "toUnsigned" A.toUnsigned
       val add = check2 "+" A.uAdd
@@ -703,7 +775,11 @@ structure TestUnsignedWrapping =
       val uShL = check2 "uShL" A.uShL
       val uShR = check2 "uShR" A.uShR
       val neg = check1 "~" A.uNeg
+      val less = checkCmp "<" A.uLess
+      val lessEq = checkCmp "<=" A.uLessEq
       val DIVZ = DIV_EXN
+      val TRUE = BOOL true
+      val FALS = BOOL false
     in
     fun test () = (
 	  List.app narrow [
@@ -827,6 +903,50 @@ structure TestUnsignedWrapping =
 	  List.app neg [
 	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
 	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
+	    ];
+	  List.app less [
+	      (3, ~4, ~4, FALS), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
+	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+	      (3, ~3, ~4, FALS), (3, ~3, ~3, FALS), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
+	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+	      (3, 0, 0, FALS),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
+	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
+	      (3, 1, 0, FALS),   (3, 1, 1, FALS),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
+	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
+	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, FALS),   (3, 2, 3, TRUE),
+	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
+	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, FALS),
+	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
+	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
+	      (3, 4, 4, FALS),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
+	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
+	      (3, 5, 4, FALS),   (3, 5, 5, FALS),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
+	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
+	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, FALS),   (3, 6, 7, TRUE),
+	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
+	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, FALS)
+	    ];
+	  List.app lessEq [
+	      (3, ~4, ~4, TRUE), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
+	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
+	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+	      (3, 0, 0, TRUE),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
+	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
+	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
+	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
+	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, TRUE),
+	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
+	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
+	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
+	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
+	      (3, 4, 4, TRUE),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
+	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
+	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
+	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
+	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, TRUE),
+	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
+	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
 	    ])
     end (* local *)
   end (* TestUnsignedWrapping *)

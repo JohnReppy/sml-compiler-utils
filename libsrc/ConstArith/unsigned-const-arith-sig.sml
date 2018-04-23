@@ -57,4 +57,8 @@ signature UNSIGNED_CONST_ARITH =
   (* 2's complement of argument as unsigned value *)
     val uNeg  : width * t -> t
 
+  (* unsigned comparisons, which correctly handle negative arguments *)
+    val uLess   : width * t * t -> bool
+    val uLessEq : width * t * t -> bool
+
   end

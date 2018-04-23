@@ -70,6 +70,10 @@ signature CONST_ARITH =
     val uShL  : width * t * t -> t	(* shift left *)
     val uShR  : width * t * t -> t	(* shift right (zero-extend) *)
 
+  (* unsigned comparisons, which correctly handle negative arguments *)
+    val uLess   : width * t * t -> bool
+    val uLessEq : width * t * t -> bool
+
   (* bitwise operations (these never trap) *)
     val bAnd : width * t * t -> t
     val bOr  : width * t * t -> t

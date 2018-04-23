@@ -119,4 +119,7 @@ functor CheckUnsignedArithFn (
     val uShL = chk2 "uShL" A.uShL
     val uShR = chk2 "uShR" A.uShR
 
+    val uLess = chk2 "uLess" A.uLess
+    val uLessEq = chk2 "uLess" A.uLessEq
+
   end

@@ -70,4 +70,8 @@ structure UnsignedWrappingArith : UNSIGNED_CONST_ARITH =
             then 0
             else uNarrow (wid, IntInf.~>>(a, Word.fromLargeInt b))
 
+  (* unsigned comparisons *)
+    fun uLess (wid, a, b) = (toUnsigned(wid, a) < toUnsigned(wid, b))
+    fun uLessEq (wid, a, b) = (toUnsigned(wid, a) <= toUnsigned(wid, b))
+
   end

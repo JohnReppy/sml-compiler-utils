@@ -70,4 +70,8 @@ structure UnsignedTrappingArith : UNSIGNED_CONST_ARITH =
             then 0
             else IntInf.~>>(a, Word.fromLargeInt b)
 
+  (* unsigned comparisons *)
+    fun uLess (wid, a, b) = (toUnsigned(wid, a) < toUnsigned(wid, b))
+    fun uLessEq (wid, a, b) = (toUnsigned(wid, a) <= toUnsigned(wid, b))
+
   end
