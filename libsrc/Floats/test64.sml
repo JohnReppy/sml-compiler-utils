@@ -86,4 +86,10 @@ val _ = (
       (* Max double: 1.7976931348623157 × 10^{308} *)
         check' (false, [1,7,9,7,6,9,3,1,3,4,8,6,2,3,1,5,7], 309,
                                 [0wx7f, 0wxef, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff]);
+      (* Max sub-normal positive double: 2.2250738585072009 × 10^{−308} *)
+	check' (false, [2,2,2,5,0,7,3,8,5,8,5,0,7,2,0,0,9], ~307,
+				[0wx00, 0wx0f, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff]);
+      (* Min sub-normal positive double: 4.9406564584124654 × 10^{-324} *)
+	check' (false, [9,9,4,0,6,5,6,4,5,8,4,1,2,4,6,5,4], ~323,
+				[0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx01]);
         ());
