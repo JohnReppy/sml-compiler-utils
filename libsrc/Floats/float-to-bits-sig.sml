@@ -46,7 +46,7 @@ signature FLOAT_TO_BITS =
     val fromBits : Word8Vector.vector -> FloatLit.t
 *)
 
-    val zero : Word8Vector.vector
+    val zero : bool -> Word8Vector.vector
     val negInf : Word8Vector.vector
     val posInf : Word8Vector.vector
     val quietNaN : Word8Vector.vector

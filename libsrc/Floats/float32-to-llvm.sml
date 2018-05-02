@@ -114,7 +114,7 @@ structure Float32ToLLVM : FLOAT_TO_BITS =
     val fromBits : Word8Vector.vector -> FloatLit.t
 *)
 
-    val zero = to64(F32ToBits.zero)
+    fun zero isNeg = to64(F32ToBits.zero isNeg)
     val negInf = to64(F32ToBits.negInf)
     val posInf = to64(F32ToBits.posInf)
     val quietNaN = to64(F32ToBits.quietNaN)
