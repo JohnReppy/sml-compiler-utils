@@ -312,10 +312,10 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) (*: FLOAT_TO_BITS*) =
                   orb (i, w2b (Word.>>(alignedExp, 0w8*Word.fromInt(numExpBytes-i-1))));
                   doExpBytes (i+1))
                 else ()
-	  in
-	    doExpBytes 0;
-	    bytes
-	  end
+          in
+            doExpBytes 0;
+            bytes
+          end
 
   (* build the byte-vector representation, where isNeg denotes the sign, exp is the word
    * representation of the biased exponent, and frac is the IntInf.int representation of
@@ -345,17 +345,17 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) (*: FLOAT_TO_BITS*) =
           val bytes = mkSignAndExp (isNeg, exp)
         (* set the modify the i'th byte by or'ing in b *)
           fun orb (i, b) = W8A.update(bytes, i, W8.orb(W8A.sub(bytes, i), b))
-	(* fill in the mantissa bits *)
-	  fun lp (mant, ix) = if (mant > 0)
-		then (
-		  orb (ix, W8.fromLargeInt mant); (* grab low 8 bits of mantissa *)
-		  lp (IntInf.~>>(mant, 0w8), ix - 1))
-		else ()
-	  in
-	    lp (frac, numBytes-1);
+        (* fill in the mantissa bits *)
+          fun lp (mant, ix) = if (mant > 0)
+                then (
+                  orb (ix, W8.fromLargeInt mant); (* grab low 8 bits of mantissa *)
+                  lp (IntInf.~>>(mant, 0w8), ix - 1))
+                else ()
+          in
+            lp (frac, numBytes-1);
           (* return the immutable vector representation *)
             W8A.toVector bytes
-	  end
+          end
 
     val specialExp = Word.<<(0w1, Word.fromInt expWidth) - 0w1
 
@@ -363,6 +363,40 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) (*: FLOAT_TO_BITS*) =
     val posInf = packSpecial (false, specialExp, 0)
     val negInf = packSpecial (true, specialExp, 0)
     val quietNaN = packSpecial (false, specialExp, 1)  (* quiet NaN with 0 payload *)
+
+    fun classify lit = (case FloatLit.toRep lit
+           of FloatLit.PosInf => IEEEReal.INF
+            | FloatLit.NegInf => IEEEReal.INF
+            | FloatLit.QNaN => IEEEReal.NAN IEEEReal.QUIET
+            | FloatLit.Flt{isNeg, digits=[], exp} => IEEEReal.ZERO
+            | FloatLit.Flt{isNeg, digits, exp} => let
+              (* convert the digits to a IntInf.int and adjust the exponent *)
+                val (frac_10, exp_10) = let
+                      fun doDigit (d, (m, e)) = (IntInf.fromInt d + 10*m, e-1)
+                      val (frac, exp) = List.foldl doDigit (0, exp) digits
+                      in
+                        (frac, IntInf.toInt exp)
+                      end
+              (* convert to base 2 *)
+                val flt = raiseToPower (round({frac=frac_10, exp=0}, precision), exp_10)
+                val {frac, exp} = round(flt, FP.significant+1)
+              (* adjust exp for size of fraction *)
+                val exp = exp + numBitsForInt frac - 1
+                in
+                  if (exp < minExp)
+                    then let
+                      val diff = Word.fromInt(minExp - exp)
+                      val frac = IntInf.~>>(frac, diff)
+                      in
+                        if frac > 0
+                          then IEEEReal.SUBNORMAL
+                          else IEEEReal.ZERO
+                      end
+                  else if (maxExp < exp)
+                    then IEEEReal.INF
+                    else IEEEReal.NORMAL
+                end
+          (* end case *))
 
     fun toBits lit = (case FloatLit.toRep lit
            of FloatLit.PosInf => (posInf, IEEEReal.INF)
