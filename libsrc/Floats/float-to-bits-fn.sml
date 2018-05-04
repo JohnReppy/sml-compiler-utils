@@ -78,7 +78,7 @@ signature IEEE_FLOAT_PARAMS =
 
   end
 
-functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) (*: FLOAT_TO_BITS*) =
+functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) : FLOAT_TO_BITS =
   struct
 
     structure W = Word
