@@ -100,6 +100,8 @@ structure Float32ToLLVM : FLOAT_TO_BITS =
   (* the number of bits in the literal representation *)
     val width = 32
 
+    val classify = F32ToBits.classify
+
   (* convert a floating-point literal to its IEEE binary representation; we also
    * return the IEEE classification of the value.  This function raises the
    * Overflow exception when the literal is too large to represent.
@@ -114,7 +116,7 @@ structure Float32ToLLVM : FLOAT_TO_BITS =
     val fromBits : Word8Vector.vector -> FloatLit.t
 *)
 
-    val zero = to64(F32ToBits.zero)
+    fun zero isNeg = to64(F32ToBits.zero isNeg)
     val negInf = to64(F32ToBits.negInf)
     val posInf = to64(F32ToBits.posInf)
     val quietNaN = to64(F32ToBits.quietNaN)

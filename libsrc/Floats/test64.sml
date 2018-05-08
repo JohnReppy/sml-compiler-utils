@@ -42,6 +42,7 @@ fun bits2s vec = String.concatWithMap
       (Word8Vector.toList vec)
 
 fun check (lit, expected) = let
+      val expected = Word8Vector.fromList expected
       val (res, _) = F64ToBits.toBits lit
       in
         print (concat (
@@ -60,7 +61,7 @@ fun check (lit, expected) = let
 fun check' (sign, digits, exp, expected) =
       check (
         FloatLit.fromDigits {isNeg = sign, digits = digits, exp = exp},
-        Word8Vector.fromList expected);
+        expected);
 
 val _ = (
       (* 0 *)
@@ -78,7 +79,7 @@ val _ = (
       (* 1.5 *)
         check' (false, [1,5], 1,[0wx3F, 0wxF8, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00]);
       (* pi *)
-        check (FloatConstants.M_PI, Word8Vector.fromList
+        check (FloatConstants.M_PI,
                                 [0wx40, 0wx09, 0wx21, 0wxFB, 0wx54, 0wx44, 0wx2D, 0wx18]);
       (* Min normal positive double: 2.2250738585072014 × 10^{−308} *)
         check' (false, [2,2,2,5,0,7,3,8,5,8,5,0,7,2,0,1,4], ~307,
@@ -86,4 +87,17 @@ val _ = (
       (* Max double: 1.7976931348623157 × 10^{308} *)
         check' (false, [1,7,9,7,6,9,3,1,3,4,8,6,2,3,1,5,7], 309,
                                 [0wx7f, 0wxef, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff]);
+      (* Max sub-normal positive double: 2.2250738585072009 × 10^{−308} *)
+	check' (false, [2,2,2,5,0,7,3,8,5,8,5,0,7,2,0,0,9], ~307,
+				[0wx00, 0wx0f, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff, 0wxff]);
+      (* sub-normal number: 9.8813129168249309  × 10^{-324} *)
+	check' (false, [9,8,8,1,3,1,2,9,1,6,8,2,4,9,3,0,9], ~323,
+				[0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx02]);
+      (* Min sub-normal positive double: 4.9406564584124654 × 10^{-324} *)
+	check' (false, [4,9,4,0,6,5,6,4,5,8,4,1,2,4,6,5,4,5], ~323,
+				[0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx01]);
+      (* Negative infinity *)
+	check (FloatLit.negInf, [0wxff, 0wxf0, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00]);
+      (* Positive infinity *)
+	check (FloatLit.posInf, [0wx7f, 0wxf0, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00, 0wx00]);
         ());
