@@ -29,8 +29,10 @@
 
 structure Log : sig
 
+  (* is logging enabled? *)
     val enabled : unit -> bool
 
+  (* initialize logging to the specified file name *)
     val init : string -> unit
 
     val logFile : unit -> TextIO.outstream
@@ -47,6 +49,7 @@ structure Log : sig
             checkIR : string * 'prog -> bool
           } -> string * 'prog -> 'prog
 
+  (* report timing to the log file *)
     val reportTiming : PhaseTimer.timer -> unit
 
   end = struct

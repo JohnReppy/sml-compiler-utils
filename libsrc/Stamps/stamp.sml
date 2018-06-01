@@ -102,4 +102,3 @@ structure Stamp :> sig
       end)
 
   end
-

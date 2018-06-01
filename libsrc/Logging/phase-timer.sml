@@ -29,27 +29,40 @@
 
 structure PhaseTimer : sig
 
-    type timer
+    type t
 
-    val newTimer : string -> timer
+  (* create a new top-level timer with the given name *)
+    val newTimer : string -> t
 
-    val newPhase : timer * string -> timer
+  (* create a sub-phase timer with the given name.  Any time measured by this timer
+   * will also be assigned to the ancestor of this timer.
+   *)
+    val newPhase : t * string -> t
 
-    val start : timer -> unit
-    val stop : timer -> unit
-    val withTimer : timer -> ('a -> 'b) -> 'a -> 'b
+  (* start a timer; note that the starting and stopping of timers should respect the
+   * nesting of the timers.
+   *)
+    val start : t -> unit
 
-    val report : TextIO.outstream * timer -> unit
+  (* stop/pause a timer *)
+    val stop : t -> unit
+
+  (* wrap a function with a timer; i.e., the timer is started when the function is
+   * called and stopped when it returns (or raises an exception).
+   *)
+    val withTimer : t -> ('a -> 'b) -> 'a -> 'b
+
+    val report : TextIO.outstream * t -> unit
 
   end = struct
 
-    datatype timer = T of {
-        parent : timer option,
-        label : string,
+    datatype t = T of {
+        parent : t option,              (* optional parent of this timer *)
+        label : string,                 (* name of the timer *)
         start : Time.time option ref,   (* SOME t when on, otherwise NONE *)
-        tot : Time.time ref,
-        childTot : Time.time ref,
-        children : timer list ref
+        tot : Time.time ref,            (* total accumulated time for the timer *)
+        childTot : Time.time ref,       (* time accumulated by its kids *)
+        children : timer list ref       (* list of kids *)
       }
 
     fun newTimer l = T{
@@ -75,8 +88,14 @@ structure PhaseTimer : sig
             newT
           end
 
-    fun start (T{label, start, ...}) = (case !start
-           of NONE => start := SOME(Time.now())
+    fun start (T{label, start, parent, ...}) = (case !start
+           of NONE => (
+                start := SOME(Time.now());
+                case !parent
+                 of SOME(T{start=NONE, ...}) => raise Fail(concat[
+                        "start(", label, "): parent is not running"
+                      ])
+                  | _ => ())
             | SOME _ => ()
           (* end case *))
 
