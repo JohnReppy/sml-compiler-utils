@@ -2,7 +2,7 @@
  *
  * Support for timing compiler phases with nesting (similar to the idea of "cost centers").
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2019 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ structure PhaseTimer : sig
         start : Time.time option ref,   (* SOME t when on, otherwise NONE *)
         tot : Time.time ref,            (* total accumulated time for the timer *)
         childTot : Time.time ref,       (* time accumulated by its kids *)
-        children : timer list ref       (* list of kids *)
+        children : t list ref           (* list of kids *)
       }
 
     fun newTimer l = T{
@@ -91,8 +91,8 @@ structure PhaseTimer : sig
     fun start (T{label, start, parent, ...}) = (case !start
            of NONE => (
                 start := SOME(Time.now());
-                case !parent
-                 of SOME(T{start=NONE, ...}) => raise Fail(concat[
+                case parent
+                 of SOME(T{start=ref NONE, ...}) => raise Fail(concat[
                         "start(", label, "): parent is not running"
                       ])
                   | _ => ())

@@ -2,7 +2,7 @@
  *
  * Support for logging internal messages to a log file.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2019 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ structure Log : sig
           } -> string * 'prog -> 'prog
 
   (* report timing to the log file *)
-    val reportTiming : PhaseTimer.timer -> unit
+    val reportTiming : PhaseTimer.t -> unit
 
   end = struct
 
