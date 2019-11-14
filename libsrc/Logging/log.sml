@@ -35,6 +35,12 @@ structure Log : sig
   (* initialize logging to the specified file name *)
     val init : string -> unit
 
+  (* terminate logging and close the log file *)
+    val finish : unit -> unit
+
+  (* return the output stream being used for logging.  This function returns
+   * a stream directed to `/dev/null` when logging has not been initialized.
+   *)
     val logFile : unit -> TextIO.outstream
 
     val msg : string list -> unit
@@ -70,6 +76,14 @@ structure Log : sig
                 end
             | SOME strm => raise Fail "multiple initialization of log file"
           (* end case *))
+
+    fun finish () = (case !logStrm
+	   of SOME strm => (
+		enabledFlg := false;
+		TextIO.closeOut strm;
+		logStrm := NONE)
+	    | NONE => ()
+	  (* end case *))
 
     fun logFile () = (case !logStrm
            of NONE => (init "/dev/null"; enabledFlg := false; logFile())
