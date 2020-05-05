@@ -182,9 +182,9 @@ structure Error :> sig
           fun gt (NONE, NONE) = false
             | gt (NONE, _) = true
             | gt (_, NONE) = false
-            | gt (SOME(l1, r1), SOME(l2, r2)) = (case Position.compare(l1, l2)
+            | gt (SOME(l1, r1), SOME(l2, r2)) = (case Int.compare(l1, l2)
                  of LESS => false
-                  | EQUAL => (Position.compare(r1, r2) = GREATER)
+                  | EQUAL => (Int.compare(r1, r2) = GREATER)
                   | GREATER => true
                 (* end case *))
           fun cmp (e1 : error, e2 : error) = gt(#pos e1, #pos e2)

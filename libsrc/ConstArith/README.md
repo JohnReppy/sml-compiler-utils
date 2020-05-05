@@ -31,7 +31,7 @@ The `CONST_ARITH` signature is a union of these three signatures.
 
 The signed and unsigned arithmetic signatures have two implementations:
 a *trapping* implementation where the `Overflow` exception is raised when
-values are two large to be represented in the specified number of bits, and
+values are too large to be represented in the specified number of bits, and
 a *wrapping* implementation, where results are narrowed to the specified precision.
 
 ````sml

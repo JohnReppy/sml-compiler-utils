@@ -25,7 +25,8 @@ utility modules, and `tools`, which contains some code generation tools.
 * [Floats](libsrc/Floats/README.md) -- A representation of floating-point
     literals plus support for converting to IEEE binary representations.
 
-* Logging -- Utility code for log messages and for timing compiler phases
+* [Logging](libsrc/Logging/README.md) -- Utility code for log messages and
+    for timing compiler phases.
 
 * Stamps -- unique stamps for tagging identifiers and other semantic objects
 
