@@ -77,7 +77,7 @@ structure Float32ToLLVM : FLOAT_TO_BITS =
    *)
     fun to64 v = let
         (* first convert the vector to a Word32 for easy access to bits *)
-          val bits = P32.subVec(v, 0)
+          val bits = subVec(v, 0)
         (* mask out components of the 32-bit representation *)
           val sign = W32.>>(W32.andb(bits, 0wx80000000), 0w31)
           val exp32 = W32.>>(W32.andb(bits, 0wx7F800000), 0w23)
@@ -90,9 +90,9 @@ structure Float32ToLLVM : FLOAT_TO_BITS =
           val res = W8A.array(8, 0w0)
           in
           (* fill high 32 bits of result *)
-            P32.update(res, 0, sign ++ W32.<<(exp64, 0w20) ++ W32.>>(man32, 0w3));
+            update(res, 0, sign ++ W32.<<(exp64, 0w20) ++ W32.>>(man32, 0w3));
           (* construct low 32 bits of result *)
-            P32.update(res, 1, W32.<<(man32, 0w29));
+            update(res, 1, W32.<<(man32, 0w29));
           (* convert to a vector for the result *)
             W8A.toVector res
           end
