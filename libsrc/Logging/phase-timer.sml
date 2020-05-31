@@ -2,7 +2,7 @@
  *
  * Support for timing compiler phases with nesting (similar to the idea of "cost centers").
  *
- * COPYRIGHT (c) 2019 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2020 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,24 @@ structure PhaseTimer : sig
    *)
     val withTimer : t -> ('a -> 'b) -> 'a -> 'b
 
+  (* generate a report about the timers.  The format of the report is controled
+   * by the flags, which have the following meanings:
+   *
+   *   prefix		-- a prefix prepended to every line of the report
+   *   wid		-- a desired line width (including prefix).  The output
+   *                       will be at least this wide, but may be wider.
+   *   sepChr		-- a character used as the separator between the name
+   *		           and values
+   *   noZeros		-- if true, counters with zero value are omitted
+   *)
+    val fmtReport : {
+	    prefix : string,
+	    wid : int,
+	    sepChr : char,
+	    noZeros : bool
+	  } -> TextIO.outstream * t -> unit
+
+  (* equivalent to `fmtReport {prefix = "", wid = 60, sepChr = #".", noZeros = false}` *)
     val report : TextIO.outstream * t -> unit
 
   end = struct
@@ -61,7 +79,7 @@ structure PhaseTimer : sig
         label : string,                 (* name of the timer *)
         start : Time.time option ref,   (* SOME t when on, otherwise NONE *)
         tot : Time.time ref,            (* total accumulated time for the timer *)
-        childTot : Time.time ref,       (* time accumulated by its kids *)
+        childTot : Time.time ref,       (* time accumulated by its immediate kids *)
         children : t list ref           (* list of kids *)
       }
 
@@ -92,8 +110,8 @@ structure PhaseTimer : sig
            of NONE => (
                 start := SOME(Time.now());
                 case parent
-                 of SOME(T{start=ref NONE, ...}) => raise Fail(concat[
-                        "start(", label, "): parent is not running"
+                 of SOME(T{start=ref NONE, label=lab, ...}) => raise Fail(concat[
+                        "start(", label, "): parent (", lab, ") is not running"
                       ])
                   | _ => ())
             | SOME _ => ()
@@ -121,10 +139,76 @@ structure PhaseTimer : sig
             y
           end
 
+    fun fmtReport {prefix, wid, sepChr, noZeros} (outS, timer) = let
+          fun pr s = TextIO.output(outS, s)
+        (* create a string by repeating a character n times *)
+          fun repeat (c, n) = CharVector.tabulate(n, Fn.const c)
+	  val leftPad = StringCvt.padLeft #" "
+	  fun time2s t = leftPad 7 (Time.fmt 3 t)
+	(* gather the lines for the report *)
+	  val lns = let
+                fun walk depth (T{label, children, tot, childTot, ...}, lns) = let
+		      val label = leftPad (2 * depth) label
+		      val t1 = let
+			    val t = Time.-(!tot, !childTot)
+			  (* avoid negative times because of non-monotonic clocks *)
+			    val t = if Time.<(t, Time.zeroTime)
+				  then Time.zeroTime
+				  else t
+			    in
+			      time2s t
+			    end
+		      val t2 = time2s (!tot)
+		      in
+			(label, t1, t2) ::
+			  List.foldr
+			    (walk (depth + 1))
+			      lns
+				(!children)
+		      end
+                in
+                  walk 0 (timer, [])
+                end
+	(* determine maximum field widths *)
+	  fun mx (s, m) = Int.max(size s, m)
+	  val (max1, max2, max3) = List.foldl
+		(fn ((s1, s2, s3), (m1, m2, m3)) => (mx(s1, m1), mx(s2, m2), mx(s2, m2)))
+		  (0, 0, 0)
+		    lns
+	(* determine the separator width *)
+	  val sepWid = wid - size prefix - (max1 + 1) - (max2 + 1) - 2 - max3
+	(* the right padding for the label *)
+	  val pad1 = StringCvt.padRight sepChr (max1 + 1)
+	  fun fmt1 name = pad1 (name ^ " ")
+	(* the minimum seperator is " .... " *)
+	  val sep = repeat (sepChr, sepWid - 2)
+	(* print a line *)
+	  fun prLn (label, t1, t2) = pr (concat [
+		  prefix, fmt1 label, sep, "  ", t1, "   ", t2, "\n"
+		])
+	(* center a string in a field of the given width *)
+          fun center (s, wid) = let
+                val padding = wid - String.size s
+                val lPad = padding div 2
+                val rPad = padding - lPad
+                in
+                  if padding < 0 then s
+                    else concat[repeat(#" ", lPad), s, repeat(#" ", rPad)]
+                end
+	  in
+	    pr prefix;
+            pr (center ("Phase", max1 + sepWid));
+            pr " "; pr(center ("Exclusive", max2 + 2));
+            pr "  "; pr(center ("Total", max3 + 1));
+            pr "\n";
+	    List.app prLn lns
+	  end
+
+(*
     fun report (outS, timer) = let
           fun pr s = TextIO.output(outS, s)
         (* create a string by repeating a character n times *)
-          fun repeat (c, n) = CharVector.tabulate(n, fn _ => c)
+          fun repeat (c, n) = CharVector.tabulate(n, Fn.const c)
         (* figure out the length of the longest label in the tree and the depth of the tree *)
           val (maxLabelLen, depth) = let
                 fun walk (T{label, children, ...}, maxLen, depth) = let
@@ -134,7 +218,10 @@ structure PhaseTimer : sig
                               (Int.max(maxLen, l), Int.max(depth, d))
                             end
                       in
-                        List.foldl doChild (Int.max(size label, maxLen), depth+1) (!children)
+                        List.foldl
+			  doChild
+			    (Int.max(size label, maxLen), depth+1)
+			      (!children)
                       end
                 in
                   walk (timer, 0, 0)
@@ -165,5 +252,8 @@ structure PhaseTimer : sig
             pr "\n";
             display (2, timer)
           end
+*)
+
+    val report = fmtReport {prefix = "", wid = 72, sepChr = #".", noZeros = false}
 
   end

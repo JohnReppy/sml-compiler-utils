@@ -11,3 +11,7 @@ Note that the `Log` module depends on the `Controls` module from the
 **SML/NJ Library**.  Add `$/controls-lib.cm` to your CM file (or
 `$(SML_LIB)/smlnj-lib/Controls/controls-lib.mlb` to your MLB file)
 to include the necessary prerequisites.
+
+The `Stats` module implements a hierarchy of integer counters for tracking
+information about a program (*e.g.*, the number of times a particular
+optimization is performed).

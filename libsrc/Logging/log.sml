@@ -2,7 +2,7 @@
  *
  * Support for logging internal messages to a log file.
  *
- * COPYRIGHT (c) 2019 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2020 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,9 +123,11 @@ structure Log : sig
 	  else ()
 
     fun after {dumpCtl, checkCtl, output, checkIR, fail} (phase, prog) = let
-          fun dump () = output(outstream(), "after "^phase, prog)
+          fun dump () = if !enabledFlg
+		then output(outstream(), "after " ^ phase, prog)
+		else output(TextIO.stdErr,  "after " ^ phase, prog)
           in
-            if Controls.get dumpCtl
+            if Controls.get dumpCtl andalso !enabledFlg
               then dump()
               else ();
             if Controls.get checkCtl andalso checkIR("after " ^ phase, prog)
