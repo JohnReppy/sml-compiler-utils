@@ -294,20 +294,23 @@ structure Stats : sig
 		      List.foldl get lns cntrs
 		    end
 	    (* we walk the group tree and gather up a list of output lines *)
-	      fun getLines (grp as G{name, kids, counters, ...}, lns') = let
-		  (* lines for the subgroups *)
-		    val lns = List.foldr getLines [] (sort (!kids))
-		  (* lines for the counters are prepended *)
-		    val lns = getCounters (!counters, lns)
-		    in
-		      case (grpHdrs, lns)
-		       of (true, []) => lns'
-			| (true, _) => if fullNames
-			    then (grpFullName grp, itos(total grp)) :: lns @ lns'
-			    else (name, itos(total grp)) :: lns @ lns'
-			| _ => lns @ lns'
-		      (* end case *)
-		    end
+	      fun getLines (grp as G{name, kids, counters, hidden, ...}, lns') =
+		    if !hidden
+		      then lns'
+		      else let
+		      (* lines for the subgroups *)
+			val lns = List.foldr getLines [] (sort (!kids))
+		      (* lines for the counters are prepended *)
+			val lns = getCounters (!counters, lns)
+			in
+			  case (grpHdrs, lns)
+			   of (true, []) => lns'
+			    | (true, _) => if fullNames
+				then (grpFullName grp, itos(total grp)) :: lns @ lns'
+				else (name, itos(total grp)) :: lns @ lns'
+			    | _ => lns @ lns'
+			  (* end case *)
+			end
 	      val lns = getLines (grp, [])
 	    (* compute maximum widths *)
 	      val (max1, max2) = List.foldl
