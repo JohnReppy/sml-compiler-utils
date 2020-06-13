@@ -132,6 +132,9 @@ structure Stats : sig
        *)
 	val report : TextIO.outstream * t -> unit
 
+      (* return a JSON object that captures the values of the counters. *)
+	val toJSON : t -> JSON.value
+
       end
 
     structure Counter : sig
@@ -339,6 +342,25 @@ structure Stats : sig
 		prefix="", wid = 72, sepChr = #".",
 		noZeros=true, grpHdrs=false, fullNames=true
 	      }
+
+	fun toJSON grp = let
+	      fun intToJSON i = JSON.INT(IntInf.fromInt i)
+	      fun priToJSON p = JSON.ARRAY(List.map intToJSON p)
+	      fun grpToJSON (G{pri, kids, counters, ...}) = let
+		    val fields = List.foldr
+			  (fn (C{name, cnt, ...}, flds) => (name, intToJSON(!cnt)) :: flds)
+			    [] (!counters)
+		    val fields = List.foldr
+			  (fn (g, flds) => (name g, grpToJSON g) :: flds)
+			    fields
+			      (List.filter (not o hidden) (!kids))
+		    val fields = ("priority", priToJSON pri) :: fields
+		    in
+		      JSON.OBJECT fields
+		    end
+	      in
+		if hidden grp then JSON.NULL else grpToJSON grp
+	      end
 
       end
 

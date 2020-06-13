@@ -72,6 +72,9 @@ structure PhaseTimer : sig
   (* equivalent to `fmtReport {prefix = "", wid = 60, sepChr = #".", noZeros = false}` *)
     val report : TextIO.outstream * t -> unit
 
+  (* return a JSON object that captures the values of the timers. *)
+    val toJSON : t -> JSON.value
+
   end = struct
 
     datatype t = T of {
@@ -160,8 +163,9 @@ structure PhaseTimer : sig
 			    end
 		      val t2 = time2s (!tot)
 		      in
+		      (* NOTE: we use foldl to reverse the order of the kids *)
 			(label, t1, t2) ::
-			  List.foldr
+			  List.foldl
 			    (walk (depth + 1))
 			      lns
 				(!children)
@@ -255,5 +259,29 @@ structure PhaseTimer : sig
 *)
 
     val report = fmtReport {prefix = "", wid = 72, sepChr = #".", noZeros = false}
+
+    fun toJSON timer = let
+	  fun timeToJSON t = JSON.FLOAT(Time.toReal t)
+	  fun timerToJSON (T{label, tot, childTot, children, ...}) = let
+		val fields = if null(!children)
+		      then []
+		      else [("kids", JSON.ARRAY(List.revMap timerToJSON (!children)))]
+		val exclT = let
+		      val t = Time.-(!tot, !childTot)
+		      in
+			if Time.<(t, Time.zeroTime)
+			  then Time.zeroTime
+			  else t
+		      end
+		val fields = ("label", JSON.STRING label) ::
+		      ("total", timeToJSON (!tot)) ::
+		      ("exclusive", timeToJSON exclT) ::
+		      fields
+		in
+		  JSON.OBJECT fields
+		end
+	  in
+	    timerToJSON timer
+	  end
 
   end

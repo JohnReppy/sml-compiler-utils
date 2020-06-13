@@ -36,6 +36,7 @@ is
   $/basis.cm
   $/smlnj-lib.cm
   $/controls-lib.cm
+  $/json-lib.cm
 
   log.sml
   phase-timer.sml
