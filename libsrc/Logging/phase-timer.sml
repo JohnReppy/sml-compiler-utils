@@ -55,19 +55,19 @@ structure PhaseTimer : sig
   (* generate a report about the timers.  The format of the report is controled
    * by the flags, which have the following meanings:
    *
-   *   prefix		-- a prefix prepended to every line of the report
-   *   wid		-- a desired line width (including prefix).  The output
+   *   prefix           -- a prefix prepended to every line of the report
+   *   wid              -- a desired line width (including prefix).  The output
    *                       will be at least this wide, but may be wider.
-   *   sepChr		-- a character used as the separator between the name
-   *		           and values
-   *   noZeros		-- if true, counters with zero value are omitted
+   *   sepChr           -- a character used as the separator between the name
+   *                       and values
+   *   noZeros          -- if true, counters with zero value are omitted
    *)
     val fmtReport : {
-	    prefix : string,
-	    wid : int,
-	    sepChr : char,
-	    noZeros : bool
-	  } -> TextIO.outstream * t -> unit
+            prefix : string,
+            wid : int,
+            sepChr : char,
+            noZeros : bool
+          } -> TextIO.outstream * t -> unit
 
   (* equivalent to `fmtReport {prefix = "", wid = 60, sepChr = #".", noZeros = false}` *)
     val report : TextIO.outstream * t -> unit
@@ -146,51 +146,51 @@ structure PhaseTimer : sig
           fun pr s = TextIO.output(outS, s)
         (* create a string by repeating a character n times *)
           fun repeat (c, n) = CharVector.tabulate(n, Fn.const c)
-	  val leftPad = StringCvt.padLeft #" "
-	  fun time2s t = leftPad 7 (Time.fmt 3 t)
-	(* gather the lines for the report *)
-	  val lns = let
+          val leftPad = StringCvt.padLeft #" "
+          fun time2s t = leftPad 7 (Time.fmt 3 t)
+        (* gather the lines for the report *)
+          val lns = let
                 fun walk depth (T{label, children, tot, childTot, ...}, lns) = let
-		      val label = leftPad (2 * depth) label
-		      val t1 = let
-			    val t = Time.-(!tot, !childTot)
-			  (* avoid negative times because of non-monotonic clocks *)
-			    val t = if Time.<(t, Time.zeroTime)
-				  then Time.zeroTime
-				  else t
-			    in
-			      time2s t
-			    end
-		      val t2 = time2s (!tot)
-		      in
-		      (* NOTE: we use foldl to reverse the order of the kids *)
-			(label, t1, t2) ::
-			  List.foldl
-			    (walk (depth + 1))
-			      lns
-				(!children)
-		      end
+                      val label = leftPad (2 * depth + size label) label
+                      val t1 = let
+                            val t = Time.-(!tot, !childTot)
+                          (* avoid negative times because of non-monotonic clocks *)
+                            val t = if Time.<(t, Time.zeroTime)
+                                  then Time.zeroTime
+                                  else t
+                            in
+                              time2s t
+                            end
+                      val t2 = time2s (!tot)
+                      in
+                      (* NOTE: we use foldl to reverse the order of the kids *)
+                        (label, t1, t2) ::
+                          List.foldl
+                            (walk (depth + 1))
+                              lns
+                                (!children)
+                      end
                 in
                   walk 0 (timer, [])
                 end
-	(* determine maximum field widths *)
-	  fun mx (s, m) = Int.max(size s, m)
-	  val (max1, max2, max3) = List.foldl
-		(fn ((s1, s2, s3), (m1, m2, m3)) => (mx(s1, m1), mx(s2, m2), mx(s2, m2)))
-		  (0, 0, 0)
-		    lns
-	(* determine the separator width *)
-	  val sepWid = wid - size prefix - (max1 + 1) - (max2 + 1) - 2 - max3
-	(* the right padding for the label *)
-	  val pad1 = StringCvt.padRight sepChr (max1 + 1)
-	  fun fmt1 name = pad1 (name ^ " ")
-	(* the minimum seperator is " .... " *)
-	  val sep = repeat (sepChr, sepWid - 2)
-	(* print a line *)
-	  fun prLn (label, t1, t2) = pr (concat [
-		  prefix, fmt1 label, sep, "  ", t1, "   ", t2, "\n"
-		])
-	(* center a string in a field of the given width *)
+        (* determine maximum field widths *)
+          fun mx (s, m) = Int.max(size s, m)
+          val (max1, max2, max3) = List.foldl
+                (fn ((s1, s2, s3), (m1, m2, m3)) => (mx(s1, m1), mx(s2, m2), mx(s2, m2)))
+                  (0, 0, 0)
+                    lns
+        (* determine the separator width *)
+          val sepWid = wid - size prefix - (max1 + 1) - (max2 + 1) - 2 - max3
+        (* the right padding for the label *)
+          val pad1 = StringCvt.padRight sepChr (max1 + 1)
+          fun fmt1 name = pad1 (name ^ " ")
+        (* the minimum seperator is " .... " *)
+          val sep = repeat (sepChr, sepWid - 2)
+        (* print a line *)
+          fun prLn (label, t1, t2) = pr (concat [
+                  prefix, fmt1 label, sep, "  ", t1, "   ", t2, "\n"
+                ])
+        (* center a string in a field of the given width *)
           fun center (s, wid) = let
                 val padding = wid - String.size s
                 val lPad = padding div 2
@@ -199,14 +199,14 @@ structure PhaseTimer : sig
                   if padding < 0 then s
                     else concat[repeat(#" ", lPad), s, repeat(#" ", rPad)]
                 end
-	  in
-	    pr prefix;
+          in
+            pr prefix;
             pr (center ("Phase", max1 + sepWid));
             pr " "; pr(center ("Exclusive", max2 + 2));
             pr "  "; pr(center ("Total", max3 + 1));
             pr "\n";
-	    List.app prLn lns
-	  end
+            List.app prLn lns
+          end
 
 (*
     fun report (outS, timer) = let
@@ -223,9 +223,9 @@ structure PhaseTimer : sig
                             end
                       in
                         List.foldl
-			  doChild
-			    (Int.max(size label, maxLen), depth+1)
-			      (!children)
+                          doChild
+                            (Int.max(size label, maxLen), depth+1)
+                              (!children)
                       end
                 in
                   walk (timer, 0, 0)
@@ -261,27 +261,27 @@ structure PhaseTimer : sig
     val report = fmtReport {prefix = "", wid = 72, sepChr = #".", noZeros = false}
 
     fun toJSON timer = let
-	  fun timeToJSON t = JSON.FLOAT(Time.toReal t)
-	  fun timerToJSON (T{label, tot, childTot, children, ...}) = let
-		val fields = if null(!children)
-		      then []
-		      else [("kids", JSON.ARRAY(List.revMap timerToJSON (!children)))]
-		val exclT = let
-		      val t = Time.-(!tot, !childTot)
-		      in
-			if Time.<(t, Time.zeroTime)
-			  then Time.zeroTime
-			  else t
-		      end
-		val fields = ("label", JSON.STRING label) ::
-		      ("total", timeToJSON (!tot)) ::
-		      ("exclusive", timeToJSON exclT) ::
-		      fields
-		in
-		  JSON.OBJECT fields
-		end
-	  in
-	    timerToJSON timer
-	  end
+          fun timeToJSON t = JSON.FLOAT(Time.toReal t)
+          fun timerToJSON (T{label, tot, childTot, children, ...}) = let
+                val fields = if null(!children)
+                      then []
+                      else [("kids", JSON.ARRAY(List.revMap timerToJSON (!children)))]
+                val exclT = let
+                      val t = Time.-(!tot, !childTot)
+                      in
+                        if Time.<(t, Time.zeroTime)
+                          then Time.zeroTime
+                          else t
+                      end
+                val fields = ("label", JSON.STRING label) ::
+                      ("total", timeToJSON (!tot)) ::
+                      ("exclusive", timeToJSON exclT) ::
+                      fields
+                in
+                  JSON.OBJECT fields
+                end
+          in
+            timerToJSON timer
+          end
 
   end
