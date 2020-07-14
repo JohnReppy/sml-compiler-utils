@@ -353,7 +353,7 @@ structure Stats : sig
 		    val fields = List.foldr
 			  (fn (g, flds) => (name g, grpToJSON g) :: flds)
 			    fields
-			      (List.filter (not o hidden) (!kids))
+			      (sort (List.filter (not o hidden) (!kids)))
 		    val fields = ("priority", priToJSON pri) :: fields
 		    in
 		      JSON.OBJECT fields
