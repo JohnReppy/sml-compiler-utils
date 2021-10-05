@@ -3,7 +3,7 @@
  * Common infrastructure for error reporting.  Includes support for error messages
  * in ML-ULex generated scanners and ML-Antlr generated parsers.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2021 John Reppy (http://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,12 @@ structure Error :> sig
     val anyWarnings : err_stream -> bool
     val sourceFile : err_stream -> string
     val sourceMap : err_stream -> AntlrStreamPos.sourcemap
+
+  (* set a limit on the number of errors allowed; when this limit is exceeded the
+   * `ERROR` exception will be raised.  Setting the limit to zero (or a negative
+   * number) will clear the limit.
+   *)
+    val setErrorLimit : err_stream * int -> unit
 
   (* add error messages to the error stream. Note that we append a newline onto
    * the message, so it is not necessary to end the message with a newline.
@@ -127,7 +133,8 @@ structure Error :> sig
                                         (* source-file positions *)
         errors          : error list ref,
         numErrors       : int ref,
-        numWarnings     : int ref
+        numWarnings     : int ref,
+        limit           : int ref       (* max number of errors allowed; default is max int *)
       }
 
     exception ERROR
@@ -138,7 +145,8 @@ structure Error :> sig
             sm = SP.mkSourcemap' filename,
             errors = ref [],
             numErrors = ref 0,
-            numWarnings = ref 0
+            numWarnings = ref 0,
+            limit = ref (valOf Int.maxInt)
           }
 
     fun anyErrors (ES{numErrors, ...}) = (!numErrors > 0)
@@ -146,9 +154,16 @@ structure Error :> sig
     fun sourceFile (ES{srcFile, ...}) = srcFile
     fun sourceMap (ES{sm, ...}) = sm
 
-    fun addErr (ES{errors, numErrors, ...}, pos, msg) = (
-          numErrors := !numErrors + 1;
-          errors := {kind=ERR, pos=pos, msg=msg} :: !errors)
+    fun setErrorLimit (ES{limit, ...}, n) = if (n <= 0)
+          then limit := valOf Int.maxInt
+          else limit := n
+
+    fun addErr (ES{errors, numErrors, limit, ...}, pos, msg) =
+          if (!numErrors <= !limit)
+            then (
+              numErrors := !numErrors + 1;
+              errors := {kind=ERR, pos=pos, msg=msg} :: !errors)
+            else raise ERROR
 
     fun addWarn (ES{errors, numWarnings, ...}, pos, msg) = (
           numWarnings := !numWarnings + 1;
@@ -313,8 +328,13 @@ structure Error :> sig
             pr
           end
 
-    fun report (outStrm, es as ES{errors, ...}) =
-          List.app (printError (outStrm, es)) (sort (!errors))
+    fun report (outStrm, es as ES{srcFile, errors, numErrors, limit, ...}) = (
+          List.app (printError (outStrm, es)) (sort (!errors));
+          if (!numErrors > !limit)
+            then TextIO.output (outStrm, concat[
+                "[", srcFile, "] Too many errors\n"
+              ])
+            else ())
 
   (* a term marked with a source-map span *)
     type 'a mark = {span : span, tree : 'a}
