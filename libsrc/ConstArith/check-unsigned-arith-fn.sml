@@ -3,7 +3,7 @@
  * A wrapper functor for implementations of the UNSIGNED_CONST_ARITH signature,
  * which adds validity checking of the arguments.
  *
- * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2025 John Reppy (http://cs.uchicago.edu/~jhr)
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -119,6 +119,7 @@ functor CheckUnsignedArithFn (
     val uShL = chk2 "uShL" A.uShL
     val uShR = chk2 "uShR" A.uShR
 
+    val uEq = chk2 "uEq" A.uEq
     val uLess = chk2 "uLess" A.uLess
     val uLessEq = chk2 "uLess" A.uLessEq
 
