@@ -2,7 +2,7 @@
  *
  * Tests for the Constant Arithmetic library.
  *
- * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2025 John Reppy (http://cs.uchicago.edu/~jhr)
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -580,6 +580,7 @@ structure TestUnsignedTrapping =
       val uShL = check2 "uShL" A.uShL
       val uShR = check2 "uShR" A.uShR
       val neg = check1 "~" A.uNeg
+      val eq = checkCmp "=" A.uEq
       val less = checkCmp "<" A.uLess
       val lessEq = checkCmp "<=" A.uLessEq
       val OVFLW = OVFL_EXN
@@ -710,6 +711,36 @@ structure TestUnsignedTrapping =
 	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
 	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
 	    ];
+	  List.app eq [
+	      (3, ~4, ~4, TRUE), (3, ~4, ~3, FALS), (3, ~4, ~2, FALS), (3, ~4, ~1, FALS),
+	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, FALS), (3, ~3, ~1, FALS),
+	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+              (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+              (3, ~4,  4, TRUE), (3, ~4,  5, FALS), (3, ~4,  6, FALS), (3, ~4,  7, FALS),
+              (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+              (3, ~3,  4, FALS), (3, ~3,  5, TRUE), (3, ~3,  6, FALS), (3, ~3,  7, FALS),
+              (3, ~2,  0, FALS), (3, ~2,  1, FALS), (3, ~2,  2, FALS), (3, ~2,  3, FALS),
+              (3, ~2,  4, FALS), (3, ~2,  5, FALS), (3, ~2,  6, TRUE), (3, ~2,  7, FALS),
+              (3, ~1,  0, FALS), (3, ~1,  1, FALS), (3, ~1,  2, FALS), (3, ~1,  3, FALS),
+              (3, ~1,  4, FALS), (3, ~1,  5, FALS), (3, ~1,  6, FALS), (3, ~1,  7, TRUE),
+	      (3, 0, 0, TRUE),   (3, 0, 1, FALS),   (3, 0, 2, FALS),   (3, 0, 3, FALS),
+	      (3, 0, 4, FALS),   (3, 0, 5, FALS),   (3, 0, 6, FALS),   (3, 0, 7, FALS),
+	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, FALS),   (3, 1, 3, FALS),
+	      (3, 1, 4, FALS),   (3, 1, 5, FALS),   (3, 1, 6, FALS),   (3, 1, 7, FALS),
+	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, FALS),
+	      (3, 2, 4, FALS),   (3, 2, 5, FALS),   (3, 2, 6, FALS),   (3, 2, 7, FALS),
+	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
+	      (3, 3, 4, FALS),   (3, 3, 5, FALS),   (3, 3, 6, FALS),   (3, 3, 7, FALS),
+	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
+	      (3, 4, 4, TRUE),   (3, 4, 5, FALS),   (3, 4, 6, FALS),   (3, 4, 7, FALS),
+	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
+	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, FALS),   (3, 5, 7, FALS),
+	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
+	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, FALS),
+	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
+	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
+	    ];
 	  List.app less [
 	      (3, ~4, ~4, FALS), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
 	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
@@ -775,6 +806,7 @@ structure TestUnsignedWrapping =
       val uShL = check2 "uShL" A.uShL
       val uShR = check2 "uShR" A.uShR
       val neg = check1 "~" A.uNeg
+      val eq = checkCmp "=" A.uEq
       val less = checkCmp "<" A.uLess
       val lessEq = checkCmp "<=" A.uLessEq
       val DIVZ = DIV_EXN
@@ -903,6 +935,36 @@ structure TestUnsignedWrapping =
 	  List.app neg [
 	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
 	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
+	    ];
+	  List.app eq [
+	      (3, ~4, ~4, TRUE), (3, ~4, ~3, FALS), (3, ~4, ~2, FALS), (3, ~4, ~1, FALS),
+	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, FALS), (3, ~3, ~1, FALS),
+	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+              (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
+              (3, ~4,  4, TRUE), (3, ~4,  5, FALS), (3, ~4,  6, FALS), (3, ~4,  7, FALS),
+              (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
+              (3, ~3,  4, FALS), (3, ~3,  5, TRUE), (3, ~3,  6, FALS), (3, ~3,  7, FALS),
+              (3, ~2,  0, FALS), (3, ~2,  1, FALS), (3, ~2,  2, FALS), (3, ~2,  3, FALS),
+              (3, ~2,  4, FALS), (3, ~2,  5, FALS), (3, ~2,  6, TRUE), (3, ~2,  7, FALS),
+              (3, ~1,  0, FALS), (3, ~1,  1, FALS), (3, ~1,  2, FALS), (3, ~1,  3, FALS),
+              (3, ~1,  4, FALS), (3, ~1,  5, FALS), (3, ~1,  6, FALS), (3, ~1,  7, TRUE),
+	      (3, 0, 0, TRUE),   (3, 0, 1, FALS),   (3, 0, 2, FALS),   (3, 0, 3, FALS),
+	      (3, 0, 4, FALS),   (3, 0, 5, FALS),   (3, 0, 6, FALS),   (3, 0, 7, FALS),
+	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, FALS),   (3, 1, 3, FALS),
+	      (3, 1, 4, FALS),   (3, 1, 5, FALS),   (3, 1, 6, FALS),   (3, 1, 7, FALS),
+	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, FALS),
+	      (3, 2, 4, FALS),   (3, 2, 5, FALS),   (3, 2, 6, FALS),   (3, 2, 7, FALS),
+	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
+	      (3, 3, 4, FALS),   (3, 3, 5, FALS),   (3, 3, 6, FALS),   (3, 3, 7, FALS),
+	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
+	      (3, 4, 4, TRUE),   (3, 4, 5, FALS),   (3, 4, 6, FALS),   (3, 4, 7, FALS),
+	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
+	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, FALS),   (3, 5, 7, FALS),
+	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
+	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, FALS),
+	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
+	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
 	    ];
 	  List.app less [
 	      (3, ~4, ~4, FALS), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
