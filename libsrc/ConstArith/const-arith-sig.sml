@@ -76,6 +76,7 @@ signature CONST_ARITH =
     val uNeg  : width * t -> t
 
   (* unsigned comparisons, which correctly handle negative arguments *)
+    val uEq     : width * t * t -> bool
     val uLess   : width * t * t -> bool
     val uLessEq : width * t * t -> bool
 
