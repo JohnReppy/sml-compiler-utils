@@ -367,7 +367,7 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) : FLOAT_TO_BITS =
     fun classify lit = (case FloatLit.toRep lit
            of FloatLit.PosInf => IEEEReal.INF
             | FloatLit.NegInf => IEEEReal.INF
-            | FloatLit.QNaN => IEEEReal.NAN IEEEReal.QUIET
+            | FloatLit.QNaN => IEEEReal.NAN
             | FloatLit.Flt{isNeg, digits=[], exp} => IEEEReal.ZERO
             | FloatLit.Flt{isNeg, digits, exp} => let
               (* convert the digits to a IntInf.int and adjust the exponent *)
@@ -401,7 +401,7 @@ functor FloatToBitsFn (FP : IEEE_FLOAT_PARAMS) : FLOAT_TO_BITS =
     fun toBits lit = (case FloatLit.toRep lit
            of FloatLit.PosInf => (posInf, IEEEReal.INF)
             | FloatLit.NegInf => (negInf, IEEEReal.INF)
-            | FloatLit.QNaN => (quietNaN, IEEEReal.NAN IEEEReal.QUIET)
+            | FloatLit.QNaN => (quietNaN, IEEEReal.NAN)
             | FloatLit.Flt{isNeg, digits=[], exp} => (zero isNeg, IEEEReal.ZERO)
             | FloatLit.Flt{isNeg, digits, exp} => let
               (* convert the digits to a IntInf.int and adjust the exponent *)
