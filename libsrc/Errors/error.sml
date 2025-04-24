@@ -3,7 +3,7 @@
  * Common infrastructure for error reporting.  Includes support for error messages
  * in ML-ULex generated scanners and ML-Antlr generated parsers.
  *
- * COPYRIGHT (c) 2021 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2021 John Reppy (https://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

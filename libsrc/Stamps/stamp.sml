@@ -5,7 +5,7 @@
  * the stamp assigned to an object is guaranteed to be unique, although
  * an object may have different stamps assigned to it in different compiles.
  *
- * COPYRIGHT (c) 2016 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2016 John Reppy (https://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

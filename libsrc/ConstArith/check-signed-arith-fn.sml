@@ -3,7 +3,7 @@
  * A wrapper functor for implementations of the SIGNED_CONST_ARITH signature,
  * which adds validity checking of the arguments.
  *
- * COPYRIGHT (c) 2017 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2017 John Reppy (https://cs.uchicago.edu/~jhr)
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

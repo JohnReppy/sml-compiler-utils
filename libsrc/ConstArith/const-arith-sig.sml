@@ -3,7 +3,7 @@
  * A generic interface for constant-folding fixed-precision integer arithmetic.
  * Implementations with different semantics for overflow are provided.
  *
- * COPYRIGHT (c) 2025 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2025 John Reppy (https://cs.uchicago.edu/~jhr)
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -2,7 +2,7 @@
  *
  * Support for timing compiler phases with nesting (similar to the idea of "cost centers").
  *
- * COPYRIGHT (c) 2020 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2020 John Reppy (https://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

@@ -2,7 +2,7 @@
  *
  * Operations for constant-folding unsigned operations on constant integers.
  *
- * COPYRIGHT (c) 2025 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2025 John Reppy (https://cs.uchicago.edu/~jhr)
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

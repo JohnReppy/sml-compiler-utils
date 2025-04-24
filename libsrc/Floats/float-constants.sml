@@ -2,7 +2,7 @@
  *
  * Floating-point literals for the special math constants from math.h.
  *
- * COPYRIGHT (c) 2018 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2018 John Reppy (https://cs.uchicago.edu/~jhr)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

@@ -3,7 +3,7 @@
  * Implements unsigned arithmetic.  Results that are out of range wrap (e.g.,
  * max-int + 1 = 0).
  *
- * COPYRIGHT (c) 2025 John Reppy (http://cs.uchicago.edu/~jhr)
+ * COPYRIGHT (c) 2025 John Reppy (https://cs.uchicago.edu/~jhr)
  * All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
