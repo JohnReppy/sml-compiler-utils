@@ -86,9 +86,15 @@ signature CONST_ARITH =
     val bXor : width * t * t -> t
     val bNot : width * t -> t
 
+    val bRotateL : width * t * t -> t
+    val bRotateR : width * t * t -> t
+
+    val bCountOnes : width * t -> t
+    val bCountLeadingZeros : width * t -> t
+    val bCountTrailingZeros : width * t -> t
+
   (* conversions between signed and unsigned interpretations *)
     val toSigned : width * t -> t       (* unsigned -> signed; uses sNarrow for overflow checking  *)
     val toUnsigned : width * t -> t     (* signed -> unsigned *)
 
   end
-

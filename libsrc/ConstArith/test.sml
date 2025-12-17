@@ -54,7 +54,7 @@ structure TestUtil =
 	  handle Overflow => OVFL_EXN
 	       | Div => DIV_EXN
 
-    fun checkApp f arg expected = let
+    fun checkApp f arg (expected : value) = let
 	  val res = eval f arg
 	  in
 	    if (expected = res)
@@ -67,7 +67,7 @@ structure TestUtil =
 	  handle Overflow => OVFL_EXN
 	       | Div => DIV_EXN
 
-    fun checkApp' f arg expected = let
+    fun checkApp' f arg (expected : value) = let
 	  val res = eval' f arg
 	  in
 	    if (expected = res)
@@ -80,29 +80,31 @@ structure TestUtil =
 	  TextIO.output(TextIO.stdOut, concat msg);
 	  TextIO.flushOut TextIO.stdOut)
 
-    fun check1 strId funId (f : int * IntInf.int -> IntInf.int) (w, arg, res) =
+    fun check1 strId w funId (f : int * IntInf.int -> IntInf.int) (arg, res) =
 	  pr [
 	      StringCvt.padRight #" " 31 (strId ^ ":"), " ",
 	      StringCvt.padLeft #" " 10 (concat[funId, " ", IntInf.toString arg]),
 	      " == ", valueToString res, " ", resultToString(checkApp f (w, arg) res), "\n"
 	    ]
 
-    fun check2 strId funId (f : int * IntInf.int * IntInf.int -> IntInf.int) (w, arg1, arg2, res) =
+    fun check2 strId w funId (f : int * IntInf.int * IntInf.int -> IntInf.int) (arg1, arg2, res) =
 	  pr [
 	      StringCvt.padRight #" " 31 (strId ^ ":"), " ",
 	      StringCvt.padLeft #" " 10 (concat[
 		  IntInf.toString arg1, " ", funId, " ", IntInf.toString arg2
 		]),
-	      " == ", valueToString res, " ", resultToString(checkApp f (w, arg1, arg2) res), "\n"
+	      " == ", valueToString res, " ",
+              resultToString(checkApp f (w, arg1, arg2) res), "\n"
 	    ]
 
-    fun checkCmp strId funId (f : int * IntInf.int * IntInf.int -> bool) (w, arg1, arg2, res) =
+    fun checkCmp strId w funId (f : int * IntInf.int * IntInf.int -> bool) (arg1, arg2, res) =
 	  pr [
 	      StringCvt.padRight #" " 31 (strId ^ ":"), " ",
 	      StringCvt.padLeft #" " 10 (concat[
 		  IntInf.toString arg1, " ", funId, " ", IntInf.toString arg2
 		]),
-	      " == ", valueToString res, " ", resultToString(checkApp' f (w, arg1, arg2) res), "\n"
+	      " == ", valueToString res, " ",
+              resultToString(checkApp' f (w, arg1, arg2) res), "\n"
 	    ]
 
   end; (* TestUtil *)
@@ -112,72 +114,110 @@ structure TestBitwiseArith =
     local
       datatype z = datatype TestUtil.value
       structure A = BitwiseConstArith
-      val check1 = TestUtil.check1 "BitwiseConstArith"
-      val check2 = TestUtil.check2 "BitwiseConstArith"
+      val check1 = TestUtil.check1 "BitwiseConstArith" 3
+      val check2 = TestUtil.check2 "BitwiseConstArith" 3
       val bAnd = check2 "AND" A.bAnd
       val bOr  = check2 "OR" A.bOr
       val bXor = check2 "XOR" A.bXor
       val bNot = check1 "NOT" A.bNot
+      val bRotateL = check2 "ROTL" A.bRotateL
+      val bRotateR = check2 "ROTR" A.bRotateR
+      val bCountOnes = check1 "POPCNT" A.bCountOnes
+      val bCountLeadingZeros = check1 "CLZ" A.bCountLeadingZeros
+      val bCountTrailingZeros = check1 "CTZ" A.bCountTrailingZeros
     in
     fun test () = (
 	  List.app bAnd [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, INT 0),   (3, 1, 1, INT 1),   (3, 1, 2, INT 0),   (3, 1, 3, INT 1),
-	      (3, 1, 4, INT 0),   (3, 1, 5, INT 1),   (3, 1, 6, INT 0),   (3, 1, 7, INT 1),
-	      (3, 2, 0, INT 0),   (3, 2, 1, INT 0),   (3, 2, 2, INT 2),   (3, 2, 3, INT 2),
-	      (3, 2, 4, INT 0),   (3, 2, 5, INT 0),   (3, 2, 6, INT 2),   (3, 2, 7, INT 2),
-	      (3, 3, 0, INT 0),   (3, 3, 1, INT 1),   (3, 3, 2, INT 2),   (3, 3, 3, INT 3),
-	      (3, 3, 4, INT 0),   (3, 3, 5, INT 1),   (3, 3, 6, INT 2),   (3, 3, 7, INT 3),
-	      (3, 4, 0, INT 0),   (3, 4, 1, INT 0),   (3, 4, 2, INT 0),   (3, 4, 3, INT 0),
-	      (3, 4, 4, INT 4),   (3, 4, 5, INT 4),   (3, 4, 6, INT 4),   (3, 4, 7, INT 4),
-	      (3, 5, 0, INT 0),   (3, 5, 1, INT 1),   (3, 5, 2, INT 0),   (3, 5, 3, INT 1),
-	      (3, 5, 4, INT 4),   (3, 5, 5, INT 5),   (3, 5, 6, INT 4),   (3, 5, 7, INT 5),
-	      (3, 6, 0, INT 0),   (3, 6, 1, INT 0),   (3, 6, 2, INT 2),   (3, 6, 3, INT 2),
-	      (3, 6, 4, INT 4),   (3, 6, 5, INT 4),   (3, 6, 6, INT 6),   (3, 6, 7, INT 6),
-	      (3, 7, 0, INT 0),   (3, 7, 1, INT 1),   (3, 7, 2, INT 2),   (3, 7, 3, INT 3),
-	      (3, 7, 4, INT 4),   (3, 7, 5, INT 5),   (3, 7, 6, INT 6),   (3, 7, 7, INT 7)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, INT 0),   (1, 1, INT 1),   (1, 2, INT 0),   (1, 3, INT 1),
+	      (1, 4, INT 0),   (1, 5, INT 1),   (1, 6, INT 0),   (1, 7, INT 1),
+	      (2, 0, INT 0),   (2, 1, INT 0),   (2, 2, INT 2),   (2, 3, INT 2),
+	      (2, 4, INT 0),   (2, 5, INT 0),   (2, 6, INT 2),   (2, 7, INT 2),
+	      (3, 0, INT 0),   (3, 1, INT 1),   (3, 2, INT 2),   (3, 3, INT 3),
+	      (3, 4, INT 0),   (3, 5, INT 1),   (3, 6, INT 2),   (3, 7, INT 3),
+	      (4, 0, INT 0),   (4, 1, INT 0),   (4, 2, INT 0),   (4, 3, INT 0),
+	      (4, 4, INT 4),   (4, 5, INT 4),   (4, 6, INT 4),   (4, 7, INT 4),
+	      (5, 0, INT 0),   (5, 1, INT 1),   (5, 2, INT 0),   (5, 3, INT 1),
+	      (5, 4, INT 4),   (5, 5, INT 5),   (5, 6, INT 4),   (5, 7, INT 5),
+	      (6, 0, INT 0),   (6, 1, INT 0),   (6, 2, INT 2),   (6, 3, INT 2),
+	      (6, 4, INT 4),   (6, 5, INT 4),   (6, 6, INT 6),   (6, 7, INT 6),
+	      (7, 0, INT 0),   (7, 1, INT 1),   (7, 2, INT 2),   (7, 3, INT 3),
+	      (7, 4, INT 4),   (7, 5, INT 5),   (7, 6, INT 6),   (7, 7, INT 7)
 	    ];
 	  List.app bOr [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
-	      (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 1),   (3, 1, 2, INT 3),   (3, 1, 3, INT 3),
-	      (3, 1, 4, INT 5),   (3, 1, 5, INT 5),   (3, 1, 6, INT 7),   (3, 1, 7, INT 7),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 3),   (3, 2, 2, INT 2),   (3, 2, 3, INT 3),
-	      (3, 2, 4, INT 6),   (3, 2, 5, INT 7),   (3, 2, 6, INT 6),   (3, 2, 7, INT 7),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 3),   (3, 3, 2, INT 3),   (3, 3, 3, INT 3),
-	      (3, 3, 4, INT 7),   (3, 3, 5, INT 7),   (3, 3, 6, INT 7),   (3, 3, 7, INT 7),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 5),   (3, 4, 2, INT 6),   (3, 4, 3, INT 7),
-	      (3, 4, 4, INT 4),   (3, 4, 5, INT 5),   (3, 4, 6, INT 6),   (3, 4, 7, INT 7),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 5),   (3, 5, 2, INT 7),   (3, 5, 3, INT 7),
-	      (3, 5, 4, INT 5),   (3, 5, 5, INT 5),   (3, 5, 6, INT 7),   (3, 5, 7, INT 7),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 7),   (3, 6, 2, INT 6),   (3, 6, 3, INT 7),
-	      (3, 6, 4, INT 6),   (3, 6, 5, INT 7),   (3, 6, 6, INT 6),   (3, 6, 7, INT 7),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 7),   (3, 7, 2, INT 7),   (3, 7, 3, INT 7),
-	      (3, 7, 4, INT 7),   (3, 7, 5, INT 7),   (3, 7, 6, INT 7),   (3, 7, 7, INT 7)
+	      (0, 0, INT 0),   (0, 1, INT 1),   (0, 2, INT 2),   (0, 3, INT 3),
+	      (0, 4, INT 4),   (0, 5, INT 5),   (0, 6, INT 6),   (0, 7, INT 7),
+	      (1, 0, INT 1),   (1, 1, INT 1),   (1, 2, INT 3),   (1, 3, INT 3),
+	      (1, 4, INT 5),   (1, 5, INT 5),   (1, 6, INT 7),   (1, 7, INT 7),
+	      (2, 0, INT 2),   (2, 1, INT 3),   (2, 2, INT 2),   (2, 3, INT 3),
+	      (2, 4, INT 6),   (2, 5, INT 7),   (2, 6, INT 6),   (2, 7, INT 7),
+	      (3, 0, INT 3),   (3, 1, INT 3),   (3, 2, INT 3),   (3, 3, INT 3),
+	      (3, 4, INT 7),   (3, 5, INT 7),   (3, 6, INT 7),   (3, 7, INT 7),
+	      (4, 0, INT 4),   (4, 1, INT 5),   (4, 2, INT 6),   (4, 3, INT 7),
+	      (4, 4, INT 4),   (4, 5, INT 5),   (4, 6, INT 6),   (4, 7, INT 7),
+	      (5, 0, INT 5),   (5, 1, INT 5),   (5, 2, INT 7),   (5, 3, INT 7),
+	      (5, 4, INT 5),   (5, 5, INT 5),   (5, 6, INT 7),   (5, 7, INT 7),
+	      (6, 0, INT 6),   (6, 1, INT 7),   (6, 2, INT 6),   (6, 3, INT 7),
+	      (6, 4, INT 6),   (6, 5, INT 7),   (6, 6, INT 6),   (6, 7, INT 7),
+	      (7, 0, INT 7),   (7, 1, INT 7),   (7, 2, INT 7),   (7, 3, INT 7),
+	      (7, 4, INT 7),   (7, 5, INT 7),   (7, 6, INT 7),   (7, 7, INT 7)
 	    ];
 	  List.app bXor [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
-	      (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, INT 3),   (3, 1, 3, INT 2),
-	      (3, 1, 4, INT 5),   (3, 1, 5, INT 4),   (3, 1, 6, INT 7),   (3, 1, 7, INT 6),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 3),   (3, 2, 2, INT 0),   (3, 2, 3, INT 1),
-	      (3, 2, 4, INT 6),   (3, 2, 5, INT 7),   (3, 2, 6, INT 4),   (3, 2, 7, INT 5),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 2),   (3, 3, 2, INT 1),   (3, 3, 3, INT 0),
-	      (3, 3, 4, INT 7),   (3, 3, 5, INT 6),   (3, 3, 6, INT 5),   (3, 3, 7, INT 4),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 5),   (3, 4, 2, INT 6),   (3, 4, 3, INT 7),
-	      (3, 4, 4, INT 0),   (3, 4, 5, INT 1),   (3, 4, 6, INT 2),   (3, 4, 7, INT 3),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 4),   (3, 5, 2, INT 7),   (3, 5, 3, INT 6),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, INT 3),   (3, 5, 7, INT 2),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 7),   (3, 6, 2, INT 4),   (3, 6, 3, INT 5),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 3),   (3, 6, 6, INT 0),   (3, 6, 7, INT 1),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 6),   (3, 7, 2, INT 5),   (3, 7, 3, INT 4),
-	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
+	      (0, 0, INT 0),   (0, 1, INT 1),   (0, 2, INT 2),   (0, 3, INT 3),
+	      (0, 4, INT 4),   (0, 5, INT 5),   (0, 6, INT 6),   (0, 7, INT 7),
+	      (1, 0, INT 1),   (1, 1, INT 0),   (1, 2, INT 3),   (1, 3, INT 2),
+	      (1, 4, INT 5),   (1, 5, INT 4),   (1, 6, INT 7),   (1, 7, INT 6),
+	      (2, 0, INT 2),   (2, 1, INT 3),   (2, 2, INT 0),   (2, 3, INT 1),
+	      (2, 4, INT 6),   (2, 5, INT 7),   (2, 6, INT 4),   (2, 7, INT 5),
+	      (3, 0, INT 3),   (3, 1, INT 2),   (3, 2, INT 1),   (3, 3, INT 0),
+	      (3, 4, INT 7),   (3, 5, INT 6),   (3, 6, INT 5),   (3, 7, INT 4),
+	      (4, 0, INT 4),   (4, 1, INT 5),   (4, 2, INT 6),   (4, 3, INT 7),
+	      (4, 4, INT 0),   (4, 5, INT 1),   (4, 6, INT 2),   (4, 7, INT 3),
+	      (5, 0, INT 5),   (5, 1, INT 4),   (5, 2, INT 7),   (5, 3, INT 6),
+	      (5, 4, INT 1),   (5, 5, INT 0),   (5, 6, INT 3),   (5, 7, INT 2),
+	      (6, 0, INT 6),   (6, 1, INT 7),   (6, 2, INT 4),   (6, 3, INT 5),
+	      (6, 4, INT 2),   (6, 5, INT 3),   (6, 6, INT 0),   (6, 7, INT 1),
+	      (7, 0, INT 7),   (7, 1, INT 6),   (7, 2, INT 5),   (7, 3, INT 4),
+	      (7, 4, INT 3),   (7, 5, INT 2),   (7, 6, INT 1),   (7, 7, INT 0)
 	    ];
 	  List.app bNot [
-	      (3, 0, INT 7),   (3, 1, INT 6),   (3, 2, INT 5),   (3, 3, INT 4),
-	      (3, 4, INT 3),   (3, 5, INT 2),   (3, 6, INT 1),   (3, 7, INT 0)
-	    ])
+	      (0, INT 7),   (1, INT 6),   (2, INT 5),   (3, INT 4),
+	      (4, INT 3),   (5, INT 2),   (6, INT 1),   (7, INT 0)
+	    ];
+          List.app bRotateL [
+              (0, 0, INT 0),  (1, 0, INT 1),  (2, 0, INT 2), (3, 0, INT 3),
+              (4, 0, INT 4),  (5, 0, INT 5),  (6, 0, INT 6), (7, 0, INT 7),
+              (0, 1, INT 0),  (1, 1, INT 2),  (2, 1, INT 4), (3, 1, INT 6),
+              (4, 1, INT 1),  (5, 1, INT 3),  (6, 1, INT 5), (7, 1, INT 7),
+              (0, 2, INT 0),  (1, 2, INT 4),  (2, 2, INT 1), (3, 2, INT 5),
+              (4, 2, INT 2),  (5, 2, INT 6),  (6, 2, INT 3), (7, 2, INT 7),
+              (0, 3, INT 0),  (1, 3, INT 1),  (2, 3, INT 2), (3, 3, INT 3),
+              (4, 3, INT 4),  (5, 3, INT 5),  (6, 3, INT 6), (7, 3, INT 7)
+            ];
+          List.app bRotateR [
+              (0, 0, INT 0),  (1, 0, INT 1),  (2, 0, INT 2), (3, 0, INT 3),
+              (4, 0, INT 4),  (5, 0, INT 5),  (6, 0, INT 6), (7, 0, INT 7),
+              (0, 1, INT 0),  (1, 1, INT 4),  (2, 1, INT 1), (3, 1, INT 5),
+              (4, 1, INT 2),  (5, 1, INT 6),  (6, 1, INT 3), (7, 1, INT 7),
+              (0, 2, INT 0),  (1, 2, INT 2),  (2, 2, INT 4), (3, 2, INT 6),
+              (4, 2, INT 1),  (5, 2, INT 3),  (6, 2, INT 5), (7, 2, INT 7),
+              (0, 3, INT 0),  (1, 3, INT 1),  (2, 3, INT 2), (3, 3, INT 3),
+              (4, 3, INT 4),  (5, 3, INT 5),  (6, 3, INT 6), (7, 3, INT 7)
+            ];
+          List.app bCountOnes [
+	      (0, INT 0),   (1, INT 1),   (2, INT 1),   (3, INT 2),
+	      (4, INT 1),   (5, INT 2),   (6, INT 2),   (7, INT 3)
+            ];
+          List.app bCountLeadingZeros [
+	      (0, INT 3),   (1, INT 2),   (2, INT 1),   (3, INT 1),
+	      (4, INT 0),   (5, INT 0),   (6, INT 0),   (7, INT 0)
+            ];
+          List.app bCountTrailingZeros [
+	      (0, INT 3),   (1, INT 0),   (2, INT 1),   (3, INT 0),
+	      (4, INT 2),   (5, INT 0),   (6, INT 1),   (7, INT 0)
+            ];
+          ())
     end (* local *)
   end (* TestBitwiseArith *)
 
@@ -186,8 +226,8 @@ structure TestSignedTrapping =
     local
       datatype z = datatype TestUtil.value
       structure A = SignedTrappingArith
-      val check1 = TestUtil.check1 "SignedWrappingArith"
-      val check2 = TestUtil.check2 "SignedWrappingArith"
+      val check1 = TestUtil.check1 "SignedWrappingArith" 3
+      val check2 = TestUtil.check2 "SignedWrappingArith" 3
       val narrow = check1 "sNarrow" A.sNarrow
       val toSigned = check1 "toSigned" A.toSigned
       val add = check2 "+" A.sAdd
@@ -206,168 +246,168 @@ structure TestSignedTrapping =
     in
     fun test () = (
 	  List.app narrow [
-	      (3, ~8, OVFLW),  (3, ~7, OVFLW),  (3, ~6, OVFLW),  (3, ~5, OVFLW),
-	      (3, ~4, INT ~4), (3, ~3, INT ~3), (3, ~2, INT ~2), (3, ~1, INT ~1),
-	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  3, INT  3),
-	      (3,  4, OVFLW),  (3,  5, OVFLW),  (3,  6, OVFLW),  (3,  7, OVFLW)
+	      (~8, OVFLW),  (~7, OVFLW),  (~6, OVFLW),  (~5, OVFLW),
+	      (~4, INT ~4), (~3, INT ~3), (~2, INT ~2), (~1, INT ~1),
+	      ( 0, INT  0), ( 1, INT  1), ( 2, INT  2), ( 3, INT  3),
+	      ( 4, OVFLW),  ( 5, OVFLW),  ( 6, OVFLW),  ( 7, OVFLW)
 	    ];
 	  List.app toSigned [
-	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
-	      (3, 4, INT ~4), (3, 5, INT ~3), (3, 6, INT ~2), (3, 7, INT ~1)
+	      (0, INT  0), (1, INT  1), (2, INT  2), (3, INT  3),
+	      (4, INT ~4), (5, INT ~3), (6, INT ~2), (7, INT ~1)
 	    ];
           List.app add [
-	      (3, ~4, ~4, OVFLW),  (3, ~4, ~3, OVFLW),  (3, ~4, ~2, OVFLW),  (3, ~4, ~1, OVFLW),
-	      (3, ~4,  0, INT ~4), (3, ~4,  1, INT ~3), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~1),
-	      (3, ~3, ~4, OVFLW),  (3, ~3, ~3, OVFLW),  (3, ~3, ~2, OVFLW),  (3, ~3, ~1, INT ~4),
-	      (3, ~3,  0, INT ~3), (3, ~3,  1, INT ~2), (3, ~3,  2, INT ~1), (3, ~3,  3, INT  0),
-	      (3, ~2, ~4, OVFLW),  (3, ~2, ~3, OVFLW),  (3, ~2, ~2, INT ~4), (3, ~2, ~1, INT ~3),
-	      (3, ~2,  0, INT ~2), (3, ~2,  1, INT ~1), (3, ~2,  2, INT  0), (3, ~2,  3, INT  1),
-	      (3, ~1, ~4, OVFLW),  (3, ~1, ~3, INT ~4), (3, ~1, ~2, INT ~3), (3, ~1, ~1, INT ~2),
-	      (3, ~1,  0, INT ~1), (3, ~1,  1, INT  0), (3, ~1,  2, INT  1), (3, ~1,  3, INT  2),
-	      (3,  0, ~4, INT ~4), (3,  0, ~3, INT ~3), (3,  0, ~2, INT ~2), (3,  0, ~1, INT ~1),
-	      (3,  0,  0, INT  0), (3,  0,  1, INT  1), (3,  0,  2, INT  2), (3,  0,  3, INT  3),
-	      (3,  1, ~4, INT ~3), (3,  1, ~3, INT ~2), (3,  1, ~2, INT ~1), (3,  1, ~1, INT  0),
-	      (3,  1,  0, INT  1), (3,  1,  1, INT  2), (3,  1,  2, INT  3), (3,  1,  3, OVFLW),
-	      (3,  2, ~4, INT ~2), (3,  2, ~3, INT ~1), (3,  2, ~2, INT  0), (3,  2, ~1, INT  1),
-	      (3,  2,  0, INT  2), (3,  2,  1, INT  3), (3,  2,  2, OVFLW),  (3,  2,  3, OVFLW),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT  0), (3,  3, ~2, INT  1), (3,  3, ~1, INT  2),
-	      (3,  3,  0, INT  3), (3,  3,  1, OVFLW),  (3,  3,  2, OVFLW),  (3,  3,  3, OVFLW)
+	      (~4, ~4, OVFLW),  (~4, ~3, OVFLW),  (~4, ~2, OVFLW),  (~4, ~1, OVFLW),
+	      (~4,  0, INT ~4), (~4,  1, INT ~3), (~4,  2, INT ~2), (~4,  3, INT ~1),
+	      (~3, ~4, OVFLW),  (~3, ~3, OVFLW),  (~3, ~2, OVFLW),  (~3, ~1, INT ~4),
+	      (~3,  0, INT ~3), (~3,  1, INT ~2), (~3,  2, INT ~1), (~3,  3, INT  0),
+	      (~2, ~4, OVFLW),  (~2, ~3, OVFLW),  (~2, ~2, INT ~4), (~2, ~1, INT ~3),
+	      (~2,  0, INT ~2), (~2,  1, INT ~1), (~2,  2, INT  0), (~2,  3, INT  1),
+	      (~1, ~4, OVFLW),  (~1, ~3, INT ~4), (~1, ~2, INT ~3), (~1, ~1, INT ~2),
+	      (~1,  0, INT ~1), (~1,  1, INT  0), (~1,  2, INT  1), (~1,  3, INT  2),
+	      ( 0, ~4, INT ~4), ( 0, ~3, INT ~3), ( 0, ~2, INT ~2), ( 0, ~1, INT ~1),
+	      ( 0,  0, INT  0), ( 0,  1, INT  1), ( 0,  2, INT  2), ( 0,  3, INT  3),
+	      ( 1, ~4, INT ~3), ( 1, ~3, INT ~2), ( 1, ~2, INT ~1), ( 1, ~1, INT  0),
+	      ( 1,  0, INT  1), ( 1,  1, INT  2), ( 1,  2, INT  3), ( 1,  3, OVFLW),
+	      ( 2, ~4, INT ~2), ( 2, ~3, INT ~1), ( 2, ~2, INT  0), ( 2, ~1, INT  1),
+	      ( 2,  0, INT  2), ( 2,  1, INT  3), ( 2,  2, OVFLW),  ( 2,  3, OVFLW),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT  0), ( 3, ~2, INT  1), ( 3, ~1, INT  2),
+	      ( 3,  0, INT  3), ( 3,  1, OVFLW),  ( 3,  2, OVFLW),  ( 3,  3, OVFLW)
 	    ];
           List.app sub [
-	      (3, ~4, ~4, INT  0), (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT ~2), (3, ~4, ~1, INT ~3),
-	      (3, ~4,  0, INT ~4), (3, ~4,  1, OVFLW),  (3, ~4,  2, OVFLW),  (3, ~4,  3, OVFLW),
-	      (3, ~3, ~4, INT  1), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT ~2),
-	      (3, ~3,  0, INT ~3), (3, ~3,  1, INT ~4), (3, ~3,  2, OVFLW),  (3, ~3,  3, OVFLW),
-	      (3, ~2, ~4, INT  2), (3, ~2, ~3, INT  1), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT ~1),
-	      (3, ~2,  0, INT ~2), (3, ~2,  1, INT ~3), (3, ~2,  2, INT ~4), (3, ~2,  3, OVFLW),
-	      (3, ~1, ~4, INT  3), (3, ~1, ~3, INT  2), (3, ~1, ~2, INT  1), (3, ~1, ~1, INT  0),
-	      (3, ~1,  0, INT ~1), (3, ~1,  1, INT ~2), (3, ~1,  2, INT ~3), (3, ~1,  3, INT ~4),
-	      (3,  0, ~4, OVFLW),  (3,  0, ~3, INT  3), (3,  0, ~2, INT  2), (3,  0, ~1, INT  1),
-	      (3,  0,  0, INT  0), (3,  0,  1, INT ~1), (3,  0,  2, INT ~2), (3,  0,  3, INT ~3),
-	      (3,  1, ~4, OVFLW),  (3,  1, ~3, OVFLW),  (3,  1, ~2, INT  3), (3,  1, ~1, INT  2),
-	      (3,  1,  0, INT  1), (3,  1,  1, INT  0), (3,  1,  2, INT ~1), (3,  1,  3, INT ~2),
-	      (3,  2, ~4, OVFLW),  (3,  2, ~3, OVFLW),  (3,  2, ~2, OVFLW),  (3,  2, ~1, INT  3),
-	      (3,  2,  0, INT  2), (3,  2,  1, INT  1), (3,  2,  2, INT  0), (3,  2,  3, INT ~1),
-	      (3,  3, ~4, OVFLW),  (3,  3, ~3, OVFLW),  (3,  3, ~2, OVFLW),  (3,  3, ~1, OVFLW),
-	      (3,  3,  0, INT  3), (3,  3,  1, INT  2), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	      (~4, ~4, INT  0), (~4, ~3, INT ~1), (~4, ~2, INT ~2), (~4, ~1, INT ~3),
+	      (~4,  0, INT ~4), (~4,  1, OVFLW),  (~4,  2, OVFLW),  (~4,  3, OVFLW),
+	      (~3, ~4, INT  1), (~3, ~3, INT  0), (~3, ~2, INT ~1), (~3, ~1, INT ~2),
+	      (~3,  0, INT ~3), (~3,  1, INT ~4), (~3,  2, OVFLW),  (~3,  3, OVFLW),
+	      (~2, ~4, INT  2), (~2, ~3, INT  1), (~2, ~2, INT  0), (~2, ~1, INT ~1),
+	      (~2,  0, INT ~2), (~2,  1, INT ~3), (~2,  2, INT ~4), (~2,  3, OVFLW),
+	      (~1, ~4, INT  3), (~1, ~3, INT  2), (~1, ~2, INT  1), (~1, ~1, INT  0),
+	      (~1,  0, INT ~1), (~1,  1, INT ~2), (~1,  2, INT ~3), (~1,  3, INT ~4),
+	      ( 0, ~4, OVFLW),  ( 0, ~3, INT  3), ( 0, ~2, INT  2), ( 0, ~1, INT  1),
+	      ( 0,  0, INT  0), ( 0,  1, INT ~1), ( 0,  2, INT ~2), ( 0,  3, INT ~3),
+	      ( 1, ~4, OVFLW),  ( 1, ~3, OVFLW),  ( 1, ~2, INT  3), ( 1, ~1, INT  2),
+	      ( 1,  0, INT  1), ( 1,  1, INT  0), ( 1,  2, INT ~1), ( 1,  3, INT ~2),
+	      ( 2, ~4, OVFLW),  ( 2, ~3, OVFLW),  ( 2, ~2, OVFLW),  ( 2, ~1, INT  3),
+	      ( 2,  0, INT  2), ( 2,  1, INT  1), ( 2,  2, INT  0), ( 2,  3, INT ~1),
+	      ( 3, ~4, OVFLW),  ( 3, ~3, OVFLW),  ( 3, ~2, OVFLW),  ( 3, ~1, OVFLW),
+	      ( 3,  0, INT  3), ( 3,  1, INT  2), ( 3,  2, INT  1), ( 3,  3, INT  0)
 	    ];
           List.app mul [
-	      (3, ~4, ~4, OVFLW),  (3, ~4, ~3, OVFLW),  (3, ~4, ~2, OVFLW),  (3, ~4, ~1, OVFLW),
-	      (3, ~4,  0, INT  0), (3, ~4,  1, INT ~4), (3, ~4,  2, OVFLW),  (3, ~4,  3, OVFLW),
-	      (3, ~3, ~4, OVFLW),  (3, ~3, ~3, OVFLW),  (3, ~3, ~2, OVFLW),  (3, ~3, ~1, INT  3),
-	      (3, ~3,  0, INT  0), (3, ~3,  1, INT ~3), (3, ~3,  2, OVFLW),  (3, ~3,  3, OVFLW),
-	      (3, ~2, ~4, OVFLW),  (3, ~2, ~3, OVFLW),  (3, ~2, ~2, OVFLW),  (3, ~2, ~1, INT  2),
-	      (3, ~2,  0, INT  0), (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~4), (3, ~2,  3, OVFLW),
-	      (3, ~1, ~4, OVFLW),  (3, ~1, ~3, INT  3), (3, ~1, ~2, INT  2), (3, ~1, ~1, INT  1),
-	      (3, ~1,  0, INT  0), (3, ~1,  1, INT ~1), (3, ~1,  2, INT ~2), (3, ~1,  3, INT ~3),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, INT  0), (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT ~4), (3,  1, ~3, INT ~3), (3,  1, ~2, INT ~2), (3,  1, ~1, INT ~1),
-	      (3,  1,  0, INT  0), (3,  1,  1, INT  1), (3,  1,  2, INT  2), (3,  1,  3, INT  3),
-	      (3,  2, ~4, OVFLW),  (3,  2, ~3, OVFLW),  (3,  2, ~2, INT ~4), (3,  2, ~1, INT ~2),
-	      (3,  2,  0, INT  0), (3,  2,  1, INT  2), (3,  2,  2, OVFLW),  (3,  2,  3, OVFLW),
-	      (3,  3, ~4, OVFLW),  (3,  3, ~3, OVFLW),  (3,  3, ~2, OVFLW),  (3,  3, ~1, INT ~3),
-	      (3,  3,  0, INT  0), (3,  3,  1, INT  3), (3,  3,  2, OVFLW),  (3,  3,  3, OVFLW)
+	      (~4, ~4, OVFLW),  (~4, ~3, OVFLW),  (~4, ~2, OVFLW),  (~4, ~1, OVFLW),
+	      (~4,  0, INT  0), (~4,  1, INT ~4), (~4,  2, OVFLW),  (~4,  3, OVFLW),
+	      (~3, ~4, OVFLW),  (~3, ~3, OVFLW),  (~3, ~2, OVFLW),  (~3, ~1, INT  3),
+	      (~3,  0, INT  0), (~3,  1, INT ~3), (~3,  2, OVFLW),  (~3,  3, OVFLW),
+	      (~2, ~4, OVFLW),  (~2, ~3, OVFLW),  (~2, ~2, OVFLW),  (~2, ~1, INT  2),
+	      (~2,  0, INT  0), (~2,  1, INT ~2), (~2,  2, INT ~4), (~2,  3, OVFLW),
+	      (~1, ~4, OVFLW),  (~1, ~3, INT  3), (~1, ~2, INT  2), (~1, ~1, INT  1),
+	      (~1,  0, INT  0), (~1,  1, INT ~1), (~1,  2, INT ~2), (~1,  3, INT ~3),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, INT  0), ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT ~4), ( 1, ~3, INT ~3), ( 1, ~2, INT ~2), ( 1, ~1, INT ~1),
+	      ( 1,  0, INT  0), ( 1,  1, INT  1), ( 1,  2, INT  2), ( 1,  3, INT  3),
+	      ( 2, ~4, OVFLW),  ( 2, ~3, OVFLW),  ( 2, ~2, INT ~4), ( 2, ~1, INT ~2),
+	      ( 2,  0, INT  0), ( 2,  1, INT  2), ( 2,  2, OVFLW),  ( 2,  3, OVFLW),
+	      ( 3, ~4, OVFLW),  ( 3, ~3, OVFLW),  ( 3, ~2, OVFLW),  ( 3, ~1, INT ~3),
+	      ( 3,  0, INT  0), ( 3,  1, INT  3), ( 3,  2, OVFLW),  ( 3,  3, OVFLW)
 	    ];
           List.app div' [
-	      (3, ~4, ~4, INT 1),  (3, ~4, ~3, INT 1),  (3, ~4, ~2, INT 2),  (3, ~4, ~1, OVFLW),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT ~4), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~2),
-	      (3, ~3, ~4, INT 0),  (3, ~3, ~3, INT  1), (3, ~3, ~2, INT  1), (3, ~3, ~1, INT  3),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT ~3), (3, ~3,  2, INT ~2), (3, ~3,  3, INT ~1),
-	      (3, ~2, ~4, INT 0),  (3, ~2, ~3, INT  0), (3, ~2, ~2, INT  1), (3, ~2, ~1, INT  2),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~1), (3, ~2,  3, INT ~1),
-	      (3, ~1, ~4, INT  0), (3, ~1, ~3, INT  0), (3, ~1, ~2, INT  0), (3, ~1, ~1, INT  1),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT ~1), (3, ~1,  2, INT ~1), (3, ~1,  3, INT ~1),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT ~1), (3,  1, ~3, INT ~1), (3,  1, ~2, INT ~1), (3,  1, ~1, INT ~1),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  1), (3,  1,  2, INT  0), (3,  1,  3, INT  0),
-	      (3,  2, ~4, INT ~1), (3,  2, ~3, INT ~1), (3,  2, ~2, INT ~1), (3,  2, ~1, INT ~2),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  2), (3,  2,  2, INT  1), (3,  2,  3, INT  0),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT ~1), (3,  3, ~2, INT ~2), (3,  3, ~1, INT ~3),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  3), (3,  3,  2, INT  1), (3,  3,  3, INT  1)
+	      (~4, ~4, INT 1),  (~4, ~3, INT 1),  (~4, ~2, INT 2),  (~4, ~1, OVFLW),
+	      (~4,  0, DIVZ),   (~4,  1, INT ~4), (~4,  2, INT ~2), (~4,  3, INT ~2),
+	      (~3, ~4, INT 0),  (~3, ~3, INT  1), (~3, ~2, INT  1), (~3, ~1, INT  3),
+	      (~3,  0, DIVZ),   (~3,  1, INT ~3), (~3,  2, INT ~2), (~3,  3, INT ~1),
+	      (~2, ~4, INT 0),  (~2, ~3, INT  0), (~2, ~2, INT  1), (~2, ~1, INT  2),
+	      (~2,  0, DIVZ),   (~2,  1, INT ~2), (~2,  2, INT ~1), (~2,  3, INT ~1),
+	      (~1, ~4, INT  0), (~1, ~3, INT  0), (~1, ~2, INT  0), (~1, ~1, INT  1),
+	      (~1,  0, DIVZ),   (~1,  1, INT ~1), (~1,  2, INT ~1), (~1,  3, INT ~1),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT ~1), ( 1, ~3, INT ~1), ( 1, ~2, INT ~1), ( 1, ~1, INT ~1),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  1), ( 1,  2, INT  0), ( 1,  3, INT  0),
+	      ( 2, ~4, INT ~1), ( 2, ~3, INT ~1), ( 2, ~2, INT ~1), ( 2, ~1, INT ~2),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  2), ( 2,  2, INT  1), ( 2,  3, INT  0),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT ~1), ( 3, ~2, INT ~2), ( 3, ~1, INT ~3),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  3), ( 3,  2, INT  1), ( 3,  3, INT  1)
 	    ];
           List.app mod' [
-	      (3, ~4, ~4, INT 0),  (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT 0),  (3, ~4, ~1, INT  0),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT  0), (3, ~4,  2, INT 0),  (3, ~4,  3, INT  2),
-	      (3, ~3, ~4, INT ~3), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT  0),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT  0), (3, ~3,  2, INT  1), (3, ~3,  3, INT  0),
-	      (3, ~2, ~4, INT ~2), (3, ~2, ~3, INT ~2), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT  0),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT  0), (3, ~2,  2, INT  0), (3, ~2,  3, INT  1),
-	      (3, ~1, ~4, INT ~1), (3, ~1, ~3, INT ~1), (3, ~1, ~2, INT ~1), (3, ~1, ~1, INT  0),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT  0), (3, ~1,  2, INT  1), (3, ~1,  3, INT  2),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT ~3), (3,  1, ~3, INT ~2), (3,  1, ~2, INT ~1), (3,  1, ~1, INT  0),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  0), (3,  1,  2, INT  1), (3,  1,  3, INT  1),
-	      (3,  2, ~4, INT ~2), (3,  2, ~3, INT ~1), (3,  2, ~2, INT  0), (3,  2, ~1, INT  0),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  0), (3,  2,  2, INT  0), (3,  2,  3, INT  2),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT  0), (3,  3, ~2, INT ~1), (3,  3, ~1, INT  0),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  0), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	      (~4, ~4, INT 0),  (~4, ~3, INT ~1), (~4, ~2, INT 0),  (~4, ~1, INT  0),
+	      (~4,  0, DIVZ),   (~4,  1, INT  0), (~4,  2, INT 0),  (~4,  3, INT  2),
+	      (~3, ~4, INT ~3), (~3, ~3, INT  0), (~3, ~2, INT ~1), (~3, ~1, INT  0),
+	      (~3,  0, DIVZ),   (~3,  1, INT  0), (~3,  2, INT  1), (~3,  3, INT  0),
+	      (~2, ~4, INT ~2), (~2, ~3, INT ~2), (~2, ~2, INT  0), (~2, ~1, INT  0),
+	      (~2,  0, DIVZ),   (~2,  1, INT  0), (~2,  2, INT  0), (~2,  3, INT  1),
+	      (~1, ~4, INT ~1), (~1, ~3, INT ~1), (~1, ~2, INT ~1), (~1, ~1, INT  0),
+	      (~1,  0, DIVZ),   (~1,  1, INT  0), (~1,  2, INT  1), (~1,  3, INT  2),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT ~3), ( 1, ~3, INT ~2), ( 1, ~2, INT ~1), ( 1, ~1, INT  0),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  0), ( 1,  2, INT  1), ( 1,  3, INT  1),
+	      ( 2, ~4, INT ~2), ( 2, ~3, INT ~1), ( 2, ~2, INT  0), ( 2, ~1, INT  0),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  0), ( 2,  2, INT  0), ( 2,  3, INT  2),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT  0), ( 3, ~2, INT ~1), ( 3, ~1, INT  0),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  0), ( 3,  2, INT  1), ( 3,  3, INT  0)
 	    ];
           List.app quot [
-	      (3, ~4, ~4, INT 1),  (3, ~4, ~3, INT 1),  (3, ~4, ~2, INT 2),  (3, ~4, ~1, OVFLW),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT ~4), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~1),
-	      (3, ~3, ~4, INT 0),  (3, ~3, ~3, INT  1), (3, ~3, ~2, INT  1), (3, ~3, ~1, INT  3),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT ~3), (3, ~3,  2, INT ~1), (3, ~3,  3, INT ~1),
-	      (3, ~2, ~4, INT 0),  (3, ~2, ~3, INT  0), (3, ~2, ~2, INT  1), (3, ~2, ~1, INT  2),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~1), (3, ~2,  3, INT  0),
-	      (3, ~1, ~4, INT  0), (3, ~1, ~3, INT  0), (3, ~1, ~2, INT  0), (3, ~1, ~1, INT  1),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT ~1), (3, ~1,  2, INT  0), (3, ~1,  3, INT  0),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT  0), (3,  1, ~3, INT  0), (3,  1, ~2, INT  0), (3,  1, ~1, INT ~1),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  1), (3,  1,  2, INT  0), (3,  1,  3, INT  0),
-	      (3,  2, ~4, INT  0), (3,  2, ~3, INT  0), (3,  2, ~2, INT ~1), (3,  2, ~1, INT ~2),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  2), (3,  2,  2, INT  1), (3,  2,  3, INT  0),
-	      (3,  3, ~4, INT  0), (3,  3, ~3, INT ~1), (3,  3, ~2, INT ~1), (3,  3, ~1, INT ~3),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  3), (3,  3,  2, INT  1), (3,  3,  3, INT  1)
+	      (~4, ~4, INT 1),  (~4, ~3, INT 1),  (~4, ~2, INT 2),  (~4, ~1, OVFLW),
+	      (~4,  0, DIVZ),   (~4,  1, INT ~4), (~4,  2, INT ~2), (~4,  3, INT ~1),
+	      (~3, ~4, INT 0),  (~3, ~3, INT  1), (~3, ~2, INT  1), (~3, ~1, INT  3),
+	      (~3,  0, DIVZ),   (~3,  1, INT ~3), (~3,  2, INT ~1), (~3,  3, INT ~1),
+	      (~2, ~4, INT 0),  (~2, ~3, INT  0), (~2, ~2, INT  1), (~2, ~1, INT  2),
+	      (~2,  0, DIVZ),   (~2,  1, INT ~2), (~2,  2, INT ~1), (~2,  3, INT  0),
+	      (~1, ~4, INT  0), (~1, ~3, INT  0), (~1, ~2, INT  0), (~1, ~1, INT  1),
+	      (~1,  0, DIVZ),   (~1,  1, INT ~1), (~1,  2, INT  0), (~1,  3, INT  0),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT  0), ( 1, ~3, INT  0), ( 1, ~2, INT  0), ( 1, ~1, INT ~1),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  1), ( 1,  2, INT  0), ( 1,  3, INT  0),
+	      ( 2, ~4, INT  0), ( 2, ~3, INT  0), ( 2, ~2, INT ~1), ( 2, ~1, INT ~2),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  2), ( 2,  2, INT  1), ( 2,  3, INT  0),
+	      ( 3, ~4, INT  0), ( 3, ~3, INT ~1), ( 3, ~2, INT ~1), ( 3, ~1, INT ~3),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  3), ( 3,  2, INT  1), ( 3,  3, INT  1)
 	    ];
           List.app rem [
-	      (3, ~4, ~4, INT 0),  (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT  0), (3, ~4, ~1, INT  0),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT  0), (3, ~4,  2, INT  0), (3, ~4,  3, INT ~1),
-	      (3, ~3, ~4, INT ~3), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT  0),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT  0), (3, ~3,  2, INT ~1), (3, ~3,  3, INT  0),
-	      (3, ~2, ~4, INT ~2), (3, ~2, ~3, INT ~2), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT  0),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT  0), (3, ~2,  2, INT  0), (3, ~2,  3, INT ~2),
-	      (3, ~1, ~4, INT ~1), (3, ~1, ~3, INT ~1), (3, ~1, ~2, INT ~1), (3, ~1, ~1, INT  0),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT  0), (3, ~1,  2, INT ~1), (3, ~1,  3, INT ~1),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT  1), (3,  1, ~3, INT  1), (3,  1, ~2, INT  1), (3,  1, ~1, INT  0),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  0), (3,  1,  2, INT  1), (3,  1,  3, INT  1),
-	      (3,  2, ~4, INT  2), (3,  2, ~3, INT  2), (3,  2, ~2, INT  0), (3,  2, ~1, INT  0),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  0), (3,  2,  2, INT  0), (3,  2,  3, INT  2),
-	      (3,  3, ~4, INT  3), (3,  3, ~3, INT  0), (3,  3, ~2, INT  1), (3,  3, ~1, INT  0),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  0), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	      (~4, ~4, INT 0),  (~4, ~3, INT ~1), (~4, ~2, INT  0), (~4, ~1, INT  0),
+	      (~4,  0, DIVZ),   (~4,  1, INT  0), (~4,  2, INT  0), (~4,  3, INT ~1),
+	      (~3, ~4, INT ~3), (~3, ~3, INT  0), (~3, ~2, INT ~1), (~3, ~1, INT  0),
+	      (~3,  0, DIVZ),   (~3,  1, INT  0), (~3,  2, INT ~1), (~3,  3, INT  0),
+	      (~2, ~4, INT ~2), (~2, ~3, INT ~2), (~2, ~2, INT  0), (~2, ~1, INT  0),
+	      (~2,  0, DIVZ),   (~2,  1, INT  0), (~2,  2, INT  0), (~2,  3, INT ~2),
+	      (~1, ~4, INT ~1), (~1, ~3, INT ~1), (~1, ~2, INT ~1), (~1, ~1, INT  0),
+	      (~1,  0, DIVZ),   (~1,  1, INT  0), (~1,  2, INT ~1), (~1,  3, INT ~1),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT  1), ( 1, ~3, INT  1), ( 1, ~2, INT  1), ( 1, ~1, INT  0),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  0), ( 1,  2, INT  1), ( 1,  3, INT  1),
+	      ( 2, ~4, INT  2), ( 2, ~3, INT  2), ( 2, ~2, INT  0), ( 2, ~1, INT  0),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  0), ( 2,  2, INT  0), ( 2,  3, INT  2),
+	      ( 3, ~4, INT  3), ( 3, ~3, INT  0), ( 3, ~2, INT  1), ( 3, ~1, INT  0),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  0), ( 3,  2, INT  1), ( 3,  3, INT  0)
 	    ];
           List.app sShL [
-              (3, ~4, 0, INT ~4),  (3, ~4, 1, OVFLW),   (3, ~4, 2, OVFLW),   (3, ~4, 3, OVFLW),
-              (3, ~3, 0, INT ~3),  (3, ~3, 1, OVFLW),   (3, ~3, 2, OVFLW),   (3, ~3, 3, OVFLW),
-              (3, ~2, 0, INT ~2),  (3, ~2, 1, INT ~4),  (3, ~2, 2, OVFLW),   (3, ~2, 3, OVFLW),
-              (3, ~1, 0, INT ~1),  (3, ~1, 1, INT ~2),  (3, ~1, 2, INT ~4),  (3, ~1, 3, OVFLW),
-              (3,  0, 0, INT  0),  (3,  0, 1, INT  0),  (3,  0, 2, INT  0),  (3,  0, 3, INT  0),
-              (3,  1, 0, INT  1),  (3,  1, 1, INT  2),  (3,  1, 2, OVFLW),   (3,  1, 3, OVFLW),
-              (3,  2, 0, INT  2),  (3,  2, 1, OVFLW),   (3,  2, 2, OVFLW),   (3,  2, 3, OVFLW),
-              (3,  3, 0, INT  3),  (3,  3, 1, OVFLW),   (3,  3, 2, OVFLW),   (3,  3, 3, OVFLW)
+              (~4, 0, INT ~4),  (~4, 1, OVFLW),   (~4, 2, OVFLW),   (~4, 3, OVFLW),
+              (~3, 0, INT ~3),  (~3, 1, OVFLW),   (~3, 2, OVFLW),   (~3, 3, OVFLW),
+              (~2, 0, INT ~2),  (~2, 1, INT ~4),  (~2, 2, OVFLW),   (~2, 3, OVFLW),
+              (~1, 0, INT ~1),  (~1, 1, INT ~2),  (~1, 2, INT ~4),  (~1, 3, OVFLW),
+              ( 0, 0, INT  0),  ( 0, 1, INT  0),  ( 0, 2, INT  0),  ( 0, 3, INT  0),
+              ( 1, 0, INT  1),  ( 1, 1, INT  2),  ( 1, 2, OVFLW),   ( 1, 3, OVFLW),
+              ( 2, 0, INT  2),  ( 2, 1, OVFLW),   ( 2, 2, OVFLW),   ( 2, 3, OVFLW),
+              ( 3, 0, INT  3),  ( 3, 1, OVFLW),   ( 3, 2, OVFLW),   ( 3, 3, OVFLW)
 	    ];
           List.app sShR [
-              (3, ~4, 0, INT ~4),  (3, ~4, 1, INT ~2),  (3, ~4, 2, INT ~1),  (3, ~4, 3, INT ~1),
-              (3, ~3, 0, INT ~3),  (3, ~3, 1, INT ~2),  (3, ~3, 2, INT ~1),  (3, ~3, 3, INT ~1),
-              (3, ~2, 0, INT ~2),  (3, ~2, 1, INT ~1),  (3, ~2, 2, INT ~1),  (3, ~2, 3, INT ~1),
-              (3, ~1, 0, INT ~1),  (3, ~1, 1, INT ~1),  (3, ~1, 2, INT ~1),  (3, ~1, 3, INT ~1),
-              (3,  0, 0, INT  0),  (3,  0, 1, INT  0),  (3,  0, 2, INT  0),  (3,  0, 3, INT  0),
-              (3,  1, 0, INT  1),  (3,  1, 1, INT  0),  (3,  1, 2, INT  0),  (3,  1, 3, INT  0),
-              (3,  2, 0, INT  2),  (3,  2, 1, INT  1),  (3,  2, 2, INT  0),  (3,  2, 3, INT  0),
-              (3,  3, 0, INT  3),  (3,  3, 1, INT  1),  (3,  3, 2, INT  0),  (3,  3, 3, INT  0)
+              (~4, 0, INT ~4),  (~4, 1, INT ~2),  (~4, 2, INT ~1),  (~4, 3, INT ~1),
+              (~3, 0, INT ~3),  (~3, 1, INT ~2),  (~3, 2, INT ~1),  (~3, 3, INT ~1),
+              (~2, 0, INT ~2),  (~2, 1, INT ~1),  (~2, 2, INT ~1),  (~2, 3, INT ~1),
+              (~1, 0, INT ~1),  (~1, 1, INT ~1),  (~1, 2, INT ~1),  (~1, 3, INT ~1),
+              ( 0, 0, INT  0),  ( 0, 1, INT  0),  ( 0, 2, INT  0),  ( 0, 3, INT  0),
+              ( 1, 0, INT  1),  ( 1, 1, INT  0),  ( 1, 2, INT  0),  ( 1, 3, INT  0),
+              ( 2, 0, INT  2),  ( 2, 1, INT  1),  ( 2, 2, INT  0),  ( 2, 3, INT  0),
+              ( 3, 0, INT  3),  ( 3, 1, INT  1),  ( 3, 2, INT  0),  ( 3, 3, INT  0)
 	    ];
 	  List.app neg [
-	      (3, ~4, OVFLW),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
-	      (3,  0, INT  0), (3,  1, INT ~1), (3,  2, INT ~2), (3,  1, INT ~1)
+	      (~4, OVFLW),  (~3, INT  3), (~2, INT  2), (~1, INT  1),
+	      ( 0, INT  0), ( 1, INT ~1), ( 2, INT ~2), ( 1, INT ~1)
 	    ];
 	  List.app abs [
-	      (3, ~4, OVFLW),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
-	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  1, INT  1)
+	      (~4, OVFLW),  (~3, INT  3), (~2, INT  2), (~1, INT  1),
+	      ( 0, INT  0), ( 1, INT  1), ( 2, INT  2), ( 1, INT  1)
 	    ])
     end (* local *)
   end (* TestSignedTrapping *)
@@ -377,8 +417,8 @@ structure TestSignedWrapping =
     local
       datatype z = datatype TestUtil.value
       structure A = SignedWrappingArith
-      val check1 = TestUtil.check1 "SignedWrappingArith"
-      val check2 = TestUtil.check2 "SignedWrappingArith"
+      val check1 = TestUtil.check1 "SignedWrappingArith" 3
+      val check2 = TestUtil.check2 "SignedWrappingArith" 3
       val narrow = check1 "sNarrow" A.sNarrow
       val toSigned = check1 "toSigned" A.toSigned
       val add = check2 "+" A.sAdd
@@ -396,168 +436,168 @@ structure TestSignedWrapping =
     in
     fun test () = (
 	  List.app narrow [
-	      (3, ~8, INT  0), (3, ~7, INT  1), (3, ~6, INT  2), (3, ~5, INT  3),
-	      (3, ~4, INT ~4), (3, ~3, INT ~3), (3, ~2, INT ~2), (3, ~1, INT ~1),
-	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  3, INT  3),
-	      (3,  4, INT ~4), (3,  5, INT ~3), (3,  6, INT ~2), (3,  7, INT ~1)
+	      (~8, INT  0), (~7, INT  1), (~6, INT  2), (~5, INT  3),
+	      (~4, INT ~4), (~3, INT ~3), (~2, INT ~2), (~1, INT ~1),
+	      ( 0, INT  0), ( 1, INT  1), ( 2, INT  2), ( 3, INT  3),
+	      ( 4, INT ~4), ( 5, INT ~3), ( 6, INT ~2), ( 7, INT ~1)
 	    ];
 	  List.app toSigned [
-	      (3, 0, INT  0), (3, 1, INT  1), (3, 2, INT  2), (3, 3, INT  3),
-	      (3, 4, INT ~4), (3, 5, INT ~3), (3, 6, INT ~2), (3, 7, INT ~1)
+	      (0, INT  0), (1, INT  1), (2, INT  2), (3, INT  3),
+	      (4, INT ~4), (5, INT ~3), (6, INT ~2), (7, INT ~1)
 	    ];
           List.app add [
-	      (3, ~4, ~4, INT  0), (3, ~4, ~3, INT  1), (3, ~4, ~2, INT  2), (3, ~4, ~1, INT  3),
-	      (3, ~4,  0, INT ~4), (3, ~4,  1, INT ~3), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~1),
-	      (3, ~3, ~4, INT  1), (3, ~3, ~3, INT  2), (3, ~3, ~2, INT  3), (3, ~3, ~1, INT ~4),
-	      (3, ~3,  0, INT ~3), (3, ~3,  1, INT ~2), (3, ~3,  2, INT ~1), (3, ~3,  3, INT  0),
-	      (3, ~2, ~4, INT  2), (3, ~2, ~3, INT  3), (3, ~2, ~2, INT ~4), (3, ~2, ~1, INT ~3),
-	      (3, ~2,  0, INT ~2), (3, ~2,  1, INT ~1), (3, ~2,  2, INT  0), (3, ~2,  3, INT  1),
-	      (3, ~1, ~4, INT  3), (3, ~1, ~3, INT ~4), (3, ~1, ~2, INT ~3), (3, ~1, ~1, INT ~2),
-	      (3, ~1,  0, INT ~1), (3, ~1,  1, INT  0), (3, ~1,  2, INT  1), (3, ~1,  3, INT  2),
-	      (3,  0, ~4, INT ~4), (3,  0, ~3, INT ~3), (3,  0, ~2, INT ~2), (3,  0, ~1, INT ~1),
-	      (3,  0,  0, INT  0), (3,  0,  1, INT  1), (3,  0,  2, INT  2), (3,  0,  3, INT  3),
-	      (3,  1, ~4, INT ~3), (3,  1, ~3, INT ~2), (3,  1, ~2, INT ~1), (3,  1, ~1, INT  0),
-	      (3,  1,  0, INT  1), (3,  1,  1, INT  2), (3,  1,  2, INT  3), (3,  1,  3, INT ~4),
-	      (3,  2, ~4, INT ~2), (3,  2, ~3, INT ~1), (3,  2, ~2, INT  0), (3,  2, ~1, INT  1),
-	      (3,  2,  0, INT  2), (3,  2,  1, INT  3), (3,  2,  2, INT ~4), (3,  2,  3, INT ~3),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT  0), (3,  3, ~2, INT  1), (3,  3, ~1, INT  2),
-	      (3,  3,  0, INT  3), (3,  3,  1, INT ~4), (3,  3,  2, INT ~3), (3,  3,  3, INT ~2)
+	      (~4, ~4, INT  0), (~4, ~3, INT  1), (~4, ~2, INT  2), (~4, ~1, INT  3),
+	      (~4,  0, INT ~4), (~4,  1, INT ~3), (~4,  2, INT ~2), (~4,  3, INT ~1),
+	      (~3, ~4, INT  1), (~3, ~3, INT  2), (~3, ~2, INT  3), (~3, ~1, INT ~4),
+	      (~3,  0, INT ~3), (~3,  1, INT ~2), (~3,  2, INT ~1), (~3,  3, INT  0),
+	      (~2, ~4, INT  2), (~2, ~3, INT  3), (~2, ~2, INT ~4), (~2, ~1, INT ~3),
+	      (~2,  0, INT ~2), (~2,  1, INT ~1), (~2,  2, INT  0), (~2,  3, INT  1),
+	      (~1, ~4, INT  3), (~1, ~3, INT ~4), (~1, ~2, INT ~3), (~1, ~1, INT ~2),
+	      (~1,  0, INT ~1), (~1,  1, INT  0), (~1,  2, INT  1), (~1,  3, INT  2),
+	      ( 0, ~4, INT ~4), ( 0, ~3, INT ~3), ( 0, ~2, INT ~2), ( 0, ~1, INT ~1),
+	      ( 0,  0, INT  0), ( 0,  1, INT  1), ( 0,  2, INT  2), ( 0,  3, INT  3),
+	      ( 1, ~4, INT ~3), ( 1, ~3, INT ~2), ( 1, ~2, INT ~1), ( 1, ~1, INT  0),
+	      ( 1,  0, INT  1), ( 1,  1, INT  2), ( 1,  2, INT  3), ( 1,  3, INT ~4),
+	      ( 2, ~4, INT ~2), ( 2, ~3, INT ~1), ( 2, ~2, INT  0), ( 2, ~1, INT  1),
+	      ( 2,  0, INT  2), ( 2,  1, INT  3), ( 2,  2, INT ~4), ( 2,  3, INT ~3),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT  0), ( 3, ~2, INT  1), ( 3, ~1, INT  2),
+	      ( 3,  0, INT  3), ( 3,  1, INT ~4), ( 3,  2, INT ~3), ( 3,  3, INT ~2)
 	    ];
           List.app sub [
-	      (3, ~4, ~4, INT  0), (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT ~2), (3, ~4, ~1, INT ~3),
-	      (3, ~4,  0, INT ~4), (3, ~4,  1, INT  3), (3, ~4,  2, INT  2), (3, ~4,  3, INT  1),
-	      (3, ~3, ~4, INT  1), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT ~2),
-	      (3, ~3,  0, INT ~3), (3, ~3,  1, INT ~4), (3, ~3,  2, INT  3), (3, ~3,  3, INT  2),
-	      (3, ~2, ~4, INT  2), (3, ~2, ~3, INT  1), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT ~1),
-	      (3, ~2,  0, INT ~2), (3, ~2,  1, INT ~3), (3, ~2,  2, INT ~4), (3, ~2,  3, INT  3),
-	      (3, ~1, ~4, INT  3), (3, ~1, ~3, INT  2), (3, ~1, ~2, INT  1), (3, ~1, ~1, INT  0),
-	      (3, ~1,  0, INT ~1), (3, ~1,  1, INT ~2), (3, ~1,  2, INT ~3), (3, ~1,  3, INT ~4),
-	      (3,  0, ~4, INT ~4), (3,  0, ~3, INT  3), (3,  0, ~2, INT  2), (3,  0, ~1, INT  1),
-	      (3,  0,  0, INT  0), (3,  0,  1, INT ~1), (3,  0,  2, INT ~2), (3,  0,  3, INT ~3),
-	      (3,  1, ~4, INT ~3), (3,  1, ~3, INT ~4), (3,  1, ~2, INT  3), (3,  1, ~1, INT  2),
-	      (3,  1,  0, INT  1), (3,  1,  1, INT  0), (3,  1,  2, INT ~1), (3,  1,  3, INT ~2),
-	      (3,  2, ~4, INT ~2), (3,  2, ~3, INT ~3), (3,  2, ~2, INT ~4), (3,  2, ~1, INT  3),
-	      (3,  2,  0, INT  2), (3,  2,  1, INT  1), (3,  2,  2, INT  0), (3,  2,  3, INT ~1),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT ~2), (3,  3, ~2, INT ~3), (3,  3, ~1, INT ~4),
-	      (3,  3,  0, INT  3), (3,  3,  1, INT  2), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	      (~4, ~4, INT  0), (~4, ~3, INT ~1), (~4, ~2, INT ~2), (~4, ~1, INT ~3),
+	      (~4,  0, INT ~4), (~4,  1, INT  3), (~4,  2, INT  2), (~4,  3, INT  1),
+	      (~3, ~4, INT  1), (~3, ~3, INT  0), (~3, ~2, INT ~1), (~3, ~1, INT ~2),
+	      (~3,  0, INT ~3), (~3,  1, INT ~4), (~3,  2, INT  3), (~3,  3, INT  2),
+	      (~2, ~4, INT  2), (~2, ~3, INT  1), (~2, ~2, INT  0), (~2, ~1, INT ~1),
+	      (~2,  0, INT ~2), (~2,  1, INT ~3), (~2,  2, INT ~4), (~2,  3, INT  3),
+	      (~1, ~4, INT  3), (~1, ~3, INT  2), (~1, ~2, INT  1), (~1, ~1, INT  0),
+	      (~1,  0, INT ~1), (~1,  1, INT ~2), (~1,  2, INT ~3), (~1,  3, INT ~4),
+	      ( 0, ~4, INT ~4), ( 0, ~3, INT  3), ( 0, ~2, INT  2), ( 0, ~1, INT  1),
+	      ( 0,  0, INT  0), ( 0,  1, INT ~1), ( 0,  2, INT ~2), ( 0,  3, INT ~3),
+	      ( 1, ~4, INT ~3), ( 1, ~3, INT ~4), ( 1, ~2, INT  3), ( 1, ~1, INT  2),
+	      ( 1,  0, INT  1), ( 1,  1, INT  0), ( 1,  2, INT ~1), ( 1,  3, INT ~2),
+	      ( 2, ~4, INT ~2), ( 2, ~3, INT ~3), ( 2, ~2, INT ~4), ( 2, ~1, INT  3),
+	      ( 2,  0, INT  2), ( 2,  1, INT  1), ( 2,  2, INT  0), ( 2,  3, INT ~1),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT ~2), ( 3, ~2, INT ~3), ( 3, ~1, INT ~4),
+	      ( 3,  0, INT  3), ( 3,  1, INT  2), ( 3,  2, INT  1), ( 3,  3, INT  0)
 	    ];
           List.app mul [
-	      (3, ~4, ~4, INT  0), (3, ~4, ~3, INT ~4), (3, ~4, ~2, INT  0), (3, ~4, ~1, INT ~4),
-	      (3, ~4,  0, INT  0), (3, ~4,  1, INT ~4), (3, ~4,  2, INT  0), (3, ~4,  3, INT ~4),
-	      (3, ~3, ~4, INT ~4), (3, ~3, ~3, INT  1), (3, ~3, ~2, INT ~2), (3, ~3, ~1, INT  3),
-	      (3, ~3,  0, INT  0), (3, ~3,  1, INT ~3), (3, ~3,  2, INT  2), (3, ~3,  3, INT ~1),
-	      (3, ~2, ~4, INT  0), (3, ~2, ~3, INT ~2), (3, ~2, ~2, INT ~4), (3, ~2, ~1, INT  2),
-	      (3, ~2,  0, INT  0), (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~4), (3, ~2,  3, INT  2),
-	      (3, ~1, ~4, INT ~4), (3, ~1, ~3, INT  3), (3, ~1, ~2, INT  2), (3, ~1, ~1, INT  1),
-	      (3, ~1,  0, INT  0), (3, ~1,  1, INT ~1), (3, ~1,  2, INT ~2), (3, ~1,  3, INT ~3),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, INT  0), (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT ~4), (3,  1, ~3, INT ~3), (3,  1, ~2, INT ~2), (3,  1, ~1, INT ~1),
-	      (3,  1,  0, INT  0), (3,  1,  1, INT  1), (3,  1,  2, INT  2), (3,  1,  3, INT  3),
-	      (3,  2, ~4, INT  0), (3,  2, ~3, INT  2), (3,  2, ~2, INT ~4), (3,  2, ~1, INT ~2),
-	      (3,  2,  0, INT  0), (3,  2,  1, INT  2), (3,  2,  2, INT ~4), (3,  2,  3, INT ~2),
-	      (3,  3, ~4, INT ~4), (3,  3, ~3, INT ~1), (3,  3, ~2, INT  2), (3,  3, ~1, INT ~3),
-	      (3,  3,  0, INT  0), (3,  3,  1, INT  3), (3,  3,  2, INT ~2), (3,  3,  3, INT  1)
+	      (~4, ~4, INT  0), (~4, ~3, INT ~4), (~4, ~2, INT  0), (~4, ~1, INT ~4),
+	      (~4,  0, INT  0), (~4,  1, INT ~4), (~4,  2, INT  0), (~4,  3, INT ~4),
+	      (~3, ~4, INT ~4), (~3, ~3, INT  1), (~3, ~2, INT ~2), (~3, ~1, INT  3),
+	      (~3,  0, INT  0), (~3,  1, INT ~3), (~3,  2, INT  2), (~3,  3, INT ~1),
+	      (~2, ~4, INT  0), (~2, ~3, INT ~2), (~2, ~2, INT ~4), (~2, ~1, INT  2),
+	      (~2,  0, INT  0), (~2,  1, INT ~2), (~2,  2, INT ~4), (~2,  3, INT  2),
+	      (~1, ~4, INT ~4), (~1, ~3, INT  3), (~1, ~2, INT  2), (~1, ~1, INT  1),
+	      (~1,  0, INT  0), (~1,  1, INT ~1), (~1,  2, INT ~2), (~1,  3, INT ~3),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, INT  0), ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT ~4), ( 1, ~3, INT ~3), ( 1, ~2, INT ~2), ( 1, ~1, INT ~1),
+	      ( 1,  0, INT  0), ( 1,  1, INT  1), ( 1,  2, INT  2), ( 1,  3, INT  3),
+	      ( 2, ~4, INT  0), ( 2, ~3, INT  2), ( 2, ~2, INT ~4), ( 2, ~1, INT ~2),
+	      ( 2,  0, INT  0), ( 2,  1, INT  2), ( 2,  2, INT ~4), ( 2,  3, INT ~2),
+	      ( 3, ~4, INT ~4), ( 3, ~3, INT ~1), ( 3, ~2, INT  2), ( 3, ~1, INT ~3),
+	      ( 3,  0, INT  0), ( 3,  1, INT  3), ( 3,  2, INT ~2), ( 3,  3, INT  1)
 	    ];
           List.app div' [
-	      (3, ~4, ~4, INT 1),  (3, ~4, ~3, INT 1),  (3, ~4, ~2, INT 2),  (3, ~4, ~1, INT ~4),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT ~4), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~2),
-	      (3, ~3, ~4, INT 0),  (3, ~3, ~3, INT  1), (3, ~3, ~2, INT  1), (3, ~3, ~1, INT  3),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT ~3), (3, ~3,  2, INT ~2), (3, ~3,  3, INT ~1),
-	      (3, ~2, ~4, INT 0),  (3, ~2, ~3, INT  0), (3, ~2, ~2, INT  1), (3, ~2, ~1, INT  2),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~1), (3, ~2,  3, INT ~1),
-	      (3, ~1, ~4, INT  0), (3, ~1, ~3, INT  0), (3, ~1, ~2, INT  0), (3, ~1, ~1, INT  1),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT ~1), (3, ~1,  2, INT ~1), (3, ~1,  3, INT ~1),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT ~1), (3,  1, ~3, INT ~1), (3,  1, ~2, INT ~1), (3,  1, ~1, INT ~1),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  1), (3,  1,  2, INT  0), (3,  1,  3, INT  0),
-	      (3,  2, ~4, INT ~1), (3,  2, ~3, INT ~1), (3,  2, ~2, INT ~1), (3,  2, ~1, INT ~2),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  2), (3,  2,  2, INT  1), (3,  2,  3, INT  0),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT ~1), (3,  3, ~2, INT ~2), (3,  3, ~1, INT ~3),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  3), (3,  3,  2, INT  1), (3,  3,  3, INT  1)
+	      (~4, ~4, INT 1),  (~4, ~3, INT 1),  (~4, ~2, INT 2),  (~4, ~1, INT ~4),
+	      (~4,  0, DIVZ),   (~4,  1, INT ~4), (~4,  2, INT ~2), (~4,  3, INT ~2),
+	      (~3, ~4, INT 0),  (~3, ~3, INT  1), (~3, ~2, INT  1), (~3, ~1, INT  3),
+	      (~3,  0, DIVZ),   (~3,  1, INT ~3), (~3,  2, INT ~2), (~3,  3, INT ~1),
+	      (~2, ~4, INT 0),  (~2, ~3, INT  0), (~2, ~2, INT  1), (~2, ~1, INT  2),
+	      (~2,  0, DIVZ),   (~2,  1, INT ~2), (~2,  2, INT ~1), (~2,  3, INT ~1),
+	      (~1, ~4, INT  0), (~1, ~3, INT  0), (~1, ~2, INT  0), (~1, ~1, INT  1),
+	      (~1,  0, DIVZ),   (~1,  1, INT ~1), (~1,  2, INT ~1), (~1,  3, INT ~1),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT ~1), ( 1, ~3, INT ~1), ( 1, ~2, INT ~1), ( 1, ~1, INT ~1),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  1), ( 1,  2, INT  0), ( 1,  3, INT  0),
+	      ( 2, ~4, INT ~1), ( 2, ~3, INT ~1), ( 2, ~2, INT ~1), ( 2, ~1, INT ~2),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  2), ( 2,  2, INT  1), ( 2,  3, INT  0),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT ~1), ( 3, ~2, INT ~2), ( 3, ~1, INT ~3),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  3), ( 3,  2, INT  1), ( 3,  3, INT  1)
 	    ];
           List.app mod' [
-	      (3, ~4, ~4, INT 0),  (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT 0),  (3, ~4, ~1, INT  0),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT  0), (3, ~4,  2, INT 0),  (3, ~4,  3, INT  2),
-	      (3, ~3, ~4, INT ~3), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT  0),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT  0), (3, ~3,  2, INT  1), (3, ~3,  3, INT  0),
-	      (3, ~2, ~4, INT ~2), (3, ~2, ~3, INT ~2), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT  0),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT  0), (3, ~2,  2, INT  0), (3, ~2,  3, INT  1),
-	      (3, ~1, ~4, INT ~1), (3, ~1, ~3, INT ~1), (3, ~1, ~2, INT ~1), (3, ~1, ~1, INT  0),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT  0), (3, ~1,  2, INT  1), (3, ~1,  3, INT  2),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT ~3), (3,  1, ~3, INT ~2), (3,  1, ~2, INT ~1), (3,  1, ~1, INT  0),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  0), (3,  1,  2, INT  1), (3,  1,  3, INT  1),
-	      (3,  2, ~4, INT ~2), (3,  2, ~3, INT ~1), (3,  2, ~2, INT  0), (3,  2, ~1, INT  0),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  0), (3,  2,  2, INT  0), (3,  2,  3, INT  2),
-	      (3,  3, ~4, INT ~1), (3,  3, ~3, INT  0), (3,  3, ~2, INT ~1), (3,  3, ~1, INT  0),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  0), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	      (~4, ~4, INT 0),  (~4, ~3, INT ~1), (~4, ~2, INT 0),  (~4, ~1, INT  0),
+	      (~4,  0, DIVZ),   (~4,  1, INT  0), (~4,  2, INT 0),  (~4,  3, INT  2),
+	      (~3, ~4, INT ~3), (~3, ~3, INT  0), (~3, ~2, INT ~1), (~3, ~1, INT  0),
+	      (~3,  0, DIVZ),   (~3,  1, INT  0), (~3,  2, INT  1), (~3,  3, INT  0),
+	      (~2, ~4, INT ~2), (~2, ~3, INT ~2), (~2, ~2, INT  0), (~2, ~1, INT  0),
+	      (~2,  0, DIVZ),   (~2,  1, INT  0), (~2,  2, INT  0), (~2,  3, INT  1),
+	      (~1, ~4, INT ~1), (~1, ~3, INT ~1), (~1, ~2, INT ~1), (~1, ~1, INT  0),
+	      (~1,  0, DIVZ),   (~1,  1, INT  0), (~1,  2, INT  1), (~1,  3, INT  2),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT ~3), ( 1, ~3, INT ~2), ( 1, ~2, INT ~1), ( 1, ~1, INT  0),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  0), ( 1,  2, INT  1), ( 1,  3, INT  1),
+	      ( 2, ~4, INT ~2), ( 2, ~3, INT ~1), ( 2, ~2, INT  0), ( 2, ~1, INT  0),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  0), ( 2,  2, INT  0), ( 2,  3, INT  2),
+	      ( 3, ~4, INT ~1), ( 3, ~3, INT  0), ( 3, ~2, INT ~1), ( 3, ~1, INT  0),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  0), ( 3,  2, INT  1), ( 3,  3, INT  0)
 	    ];
           List.app quot [
-	      (3, ~4, ~4, INT 1),  (3, ~4, ~3, INT 1),  (3, ~4, ~2, INT 2),  (3, ~4, ~1, INT ~4),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT ~4), (3, ~4,  2, INT ~2), (3, ~4,  3, INT ~1),
-	      (3, ~3, ~4, INT 0),  (3, ~3, ~3, INT  1), (3, ~3, ~2, INT  1), (3, ~3, ~1, INT  3),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT ~3), (3, ~3,  2, INT ~1), (3, ~3,  3, INT ~1),
-	      (3, ~2, ~4, INT 0),  (3, ~2, ~3, INT  0), (3, ~2, ~2, INT  1), (3, ~2, ~1, INT  2),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT ~2), (3, ~2,  2, INT ~1), (3, ~2,  3, INT  0),
-	      (3, ~1, ~4, INT  0), (3, ~1, ~3, INT  0), (3, ~1, ~2, INT  0), (3, ~1, ~1, INT  1),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT ~1), (3, ~1,  2, INT  0), (3, ~1,  3, INT  0),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT  0), (3,  1, ~3, INT  0), (3,  1, ~2, INT  0), (3,  1, ~1, INT ~1),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  1), (3,  1,  2, INT  0), (3,  1,  3, INT  0),
-	      (3,  2, ~4, INT  0), (3,  2, ~3, INT  0), (3,  2, ~2, INT ~1), (3,  2, ~1, INT ~2),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  2), (3,  2,  2, INT  1), (3,  2,  3, INT  0),
-	      (3,  3, ~4, INT  0), (3,  3, ~3, INT ~1), (3,  3, ~2, INT ~1), (3,  3, ~1, INT ~3),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  3), (3,  3,  2, INT  1), (3,  3,  3, INT  1)
+	      (~4, ~4, INT 1),  (~4, ~3, INT 1),  (~4, ~2, INT 2),  (~4, ~1, INT ~4),
+	      (~4,  0, DIVZ),   (~4,  1, INT ~4), (~4,  2, INT ~2), (~4,  3, INT ~1),
+	      (~3, ~4, INT 0),  (~3, ~3, INT  1), (~3, ~2, INT  1), (~3, ~1, INT  3),
+	      (~3,  0, DIVZ),   (~3,  1, INT ~3), (~3,  2, INT ~1), (~3,  3, INT ~1),
+	      (~2, ~4, INT 0),  (~2, ~3, INT  0), (~2, ~2, INT  1), (~2, ~1, INT  2),
+	      (~2,  0, DIVZ),   (~2,  1, INT ~2), (~2,  2, INT ~1), (~2,  3, INT  0),
+	      (~1, ~4, INT  0), (~1, ~3, INT  0), (~1, ~2, INT  0), (~1, ~1, INT  1),
+	      (~1,  0, DIVZ),   (~1,  1, INT ~1), (~1,  2, INT  0), (~1,  3, INT  0),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT  0), ( 1, ~3, INT  0), ( 1, ~2, INT  0), ( 1, ~1, INT ~1),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  1), ( 1,  2, INT  0), ( 1,  3, INT  0),
+	      ( 2, ~4, INT  0), ( 2, ~3, INT  0), ( 2, ~2, INT ~1), ( 2, ~1, INT ~2),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  2), ( 2,  2, INT  1), ( 2,  3, INT  0),
+	      ( 3, ~4, INT  0), ( 3, ~3, INT ~1), ( 3, ~2, INT ~1), ( 3, ~1, INT ~3),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  3), ( 3,  2, INT  1), ( 3,  3, INT  1)
 	    ];
           List.app rem [
-	      (3, ~4, ~4, INT 0),  (3, ~4, ~3, INT ~1), (3, ~4, ~2, INT  0), (3, ~4, ~1, INT  0),
-	      (3, ~4,  0, DIVZ),   (3, ~4,  1, INT  0), (3, ~4,  2, INT  0), (3, ~4,  3, INT ~1),
-	      (3, ~3, ~4, INT ~3), (3, ~3, ~3, INT  0), (3, ~3, ~2, INT ~1), (3, ~3, ~1, INT  0),
-	      (3, ~3,  0, DIVZ),   (3, ~3,  1, INT  0), (3, ~3,  2, INT ~1), (3, ~3,  3, INT  0),
-	      (3, ~2, ~4, INT ~2), (3, ~2, ~3, INT ~2), (3, ~2, ~2, INT  0), (3, ~2, ~1, INT  0),
-	      (3, ~2,  0, DIVZ),   (3, ~2,  1, INT  0), (3, ~2,  2, INT  0), (3, ~2,  3, INT ~2),
-	      (3, ~1, ~4, INT ~1), (3, ~1, ~3, INT ~1), (3, ~1, ~2, INT ~1), (3, ~1, ~1, INT  0),
-	      (3, ~1,  0, DIVZ),   (3, ~1,  1, INT  0), (3, ~1,  2, INT ~1), (3, ~1,  3, INT ~1),
-	      (3,  0, ~4, INT  0), (3,  0, ~3, INT  0), (3,  0, ~2, INT  0), (3,  0, ~1, INT  0),
-	      (3,  0,  0, DIVZ),   (3,  0,  1, INT  0), (3,  0,  2, INT  0), (3,  0,  3, INT  0),
-	      (3,  1, ~4, INT  1), (3,  1, ~3, INT  1), (3,  1, ~2, INT  1), (3,  1, ~1, INT  0),
-	      (3,  1,  0, DIVZ),   (3,  1,  1, INT  0), (3,  1,  2, INT  1), (3,  1,  3, INT  1),
-	      (3,  2, ~4, INT  2), (3,  2, ~3, INT  2), (3,  2, ~2, INT  0), (3,  2, ~1, INT  0),
-	      (3,  2,  0, DIVZ),   (3,  2,  1, INT  0), (3,  2,  2, INT  0), (3,  2,  3, INT  2),
-	      (3,  3, ~4, INT  3), (3,  3, ~3, INT  0), (3,  3, ~2, INT  1), (3,  3, ~1, INT  0),
-	      (3,  3,  0, DIVZ),   (3,  3,  1, INT  0), (3,  3,  2, INT  1), (3,  3,  3, INT  0)
+	      (~4, ~4, INT 0),  (~4, ~3, INT ~1), (~4, ~2, INT  0), (~4, ~1, INT  0),
+	      (~4,  0, DIVZ),   (~4,  1, INT  0), (~4,  2, INT  0), (~4,  3, INT ~1),
+	      (~3, ~4, INT ~3), (~3, ~3, INT  0), (~3, ~2, INT ~1), (~3, ~1, INT  0),
+	      (~3,  0, DIVZ),   (~3,  1, INT  0), (~3,  2, INT ~1), (~3,  3, INT  0),
+	      (~2, ~4, INT ~2), (~2, ~3, INT ~2), (~2, ~2, INT  0), (~2, ~1, INT  0),
+	      (~2,  0, DIVZ),   (~2,  1, INT  0), (~2,  2, INT  0), (~2,  3, INT ~2),
+	      (~1, ~4, INT ~1), (~1, ~3, INT ~1), (~1, ~2, INT ~1), (~1, ~1, INT  0),
+	      (~1,  0, DIVZ),   (~1,  1, INT  0), (~1,  2, INT ~1), (~1,  3, INT ~1),
+	      ( 0, ~4, INT  0), ( 0, ~3, INT  0), ( 0, ~2, INT  0), ( 0, ~1, INT  0),
+	      ( 0,  0, DIVZ),   ( 0,  1, INT  0), ( 0,  2, INT  0), ( 0,  3, INT  0),
+	      ( 1, ~4, INT  1), ( 1, ~3, INT  1), ( 1, ~2, INT  1), ( 1, ~1, INT  0),
+	      ( 1,  0, DIVZ),   ( 1,  1, INT  0), ( 1,  2, INT  1), ( 1,  3, INT  1),
+	      ( 2, ~4, INT  2), ( 2, ~3, INT  2), ( 2, ~2, INT  0), ( 2, ~1, INT  0),
+	      ( 2,  0, DIVZ),   ( 2,  1, INT  0), ( 2,  2, INT  0), ( 2,  3, INT  2),
+	      ( 3, ~4, INT  3), ( 3, ~3, INT  0), ( 3, ~2, INT  1), ( 3, ~1, INT  0),
+	      ( 3,  0, DIVZ),   ( 3,  1, INT  0), ( 3,  2, INT  1), ( 3,  3, INT  0)
 	    ];
           List.app sShL [
-              (3, ~4, 0, INT ~4),  (3, ~4, 1, INT  0),  (3, ~4, 2, INT  0),  (3, ~4, 3, INT  0),
-              (3, ~3, 0, INT ~3),  (3, ~3, 1, INT  2),  (3, ~3, 2, INT ~4),  (3, ~3, 3, INT  0),
-              (3, ~2, 0, INT ~2),  (3, ~2, 1, INT ~4),  (3, ~2, 2, INT  0),  (3, ~2, 3, INT  0),
-              (3, ~1, 0, INT ~1),  (3, ~1, 1, INT ~2),  (3, ~1, 2, INT ~4),  (3, ~1, 3, INT  0),
-              (3,  0, 0, INT  0),  (3,  0, 1, INT  0),  (3,  0, 2, INT  0),  (3,  0, 3, INT  0),
-              (3,  1, 0, INT  1),  (3,  1, 1, INT  2),  (3,  1, 2, INT ~4),  (3,  1, 3, INT  0),
-              (3,  2, 0, INT  2),  (3,  2, 1, INT ~4),  (3,  2, 2, INT  0),  (3,  2, 3, INT  0),
-              (3,  3, 0, INT  3),  (3,  3, 1, INT ~2),  (3,  3, 2, INT ~4),  (3,  3, 3, INT  0)
+              (~4, 0, INT ~4),  (~4, 1, INT  0),  (~4, 2, INT  0),  (~4, 3, INT  0),
+              (~3, 0, INT ~3),  (~3, 1, INT  2),  (~3, 2, INT ~4),  (~3, 3, INT  0),
+              (~2, 0, INT ~2),  (~2, 1, INT ~4),  (~2, 2, INT  0),  (~2, 3, INT  0),
+              (~1, 0, INT ~1),  (~1, 1, INT ~2),  (~1, 2, INT ~4),  (~1, 3, INT  0),
+              ( 0, 0, INT  0),  ( 0, 1, INT  0),  ( 0, 2, INT  0),  ( 0, 3, INT  0),
+              ( 1, 0, INT  1),  ( 1, 1, INT  2),  ( 1, 2, INT ~4),  ( 1, 3, INT  0),
+              ( 2, 0, INT  2),  ( 2, 1, INT ~4),  ( 2, 2, INT  0),  ( 2, 3, INT  0),
+              ( 3, 0, INT  3),  ( 3, 1, INT ~2),  ( 3, 2, INT ~4),  ( 3, 3, INT  0)
 	    ];
           List.app sShR [
-              (3, ~4, 0, INT ~4),  (3, ~4, 1, INT ~2),  (3, ~4, 2, INT ~1),  (3, ~4, 3, INT ~1),
-              (3, ~3, 0, INT ~3),  (3, ~3, 1, INT ~2),  (3, ~3, 2, INT ~1),  (3, ~3, 3, INT ~1),
-              (3, ~2, 0, INT ~2),  (3, ~2, 1, INT ~1),  (3, ~2, 2, INT ~1),  (3, ~2, 3, INT ~1),
-              (3, ~1, 0, INT ~1),  (3, ~1, 1, INT ~1),  (3, ~1, 2, INT ~1),  (3, ~1, 3, INT ~1),
-              (3,  0, 0, INT  0),  (3,  0, 1, INT  0),  (3,  0, 2, INT  0),  (3,  0, 3, INT  0),
-              (3,  1, 0, INT  1),  (3,  1, 1, INT  0),  (3,  1, 2, INT  0),  (3,  1, 3, INT  0),
-              (3,  2, 0, INT  2),  (3,  2, 1, INT  1),  (3,  2, 2, INT  0),  (3,  2, 3, INT  0),
-              (3,  3, 0, INT  3),  (3,  3, 1, INT  1),  (3,  3, 2, INT  0),  (3,  3, 3, INT  0)
+              (~4, 0, INT ~4),  (~4, 1, INT ~2),  (~4, 2, INT ~1),  (~4, 3, INT ~1),
+              (~3, 0, INT ~3),  (~3, 1, INT ~2),  (~3, 2, INT ~1),  (~3, 3, INT ~1),
+              (~2, 0, INT ~2),  (~2, 1, INT ~1),  (~2, 2, INT ~1),  (~2, 3, INT ~1),
+              (~1, 0, INT ~1),  (~1, 1, INT ~1),  (~1, 2, INT ~1),  (~1, 3, INT ~1),
+              ( 0, 0, INT  0),  ( 0, 1, INT  0),  ( 0, 2, INT  0),  ( 0, 3, INT  0),
+              ( 1, 0, INT  1),  ( 1, 1, INT  0),  ( 1, 2, INT  0),  ( 1, 3, INT  0),
+              ( 2, 0, INT  2),  ( 2, 1, INT  1),  ( 2, 2, INT  0),  ( 2, 3, INT  0),
+              ( 3, 0, INT  3),  ( 3, 1, INT  1),  ( 3, 2, INT  0),  ( 3, 3, INT  0)
 	    ];
 	  List.app neg [
-	      (3, ~4, INT ~4),  (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
-	      (3,  0, INT  0), (3,  1, INT ~1), (3,  2, INT ~2), (3,  1, INT ~1)
+	      (~4, INT ~4),  (~3, INT  3), (~2, INT  2), (~1, INT  1),
+	      ( 0, INT  0), ( 1, INT ~1), ( 2, INT ~2), ( 1, INT ~1)
 	    ];
 	  List.app abs [
-	      (3, ~4, INT ~4), (3, ~3, INT  3), (3, ~2, INT  2), (3, ~1, INT  1),
-	      (3,  0, INT  0), (3,  1, INT  1), (3,  2, INT  2), (3,  1, INT  1)
+	      (~4, INT ~4), (~3, INT  3), (~2, INT  2), (~1, INT  1),
+	      ( 0, INT  0), ( 1, INT  1), ( 2, INT  2), ( 1, INT  1)
 	    ])
     end (* local *)
   end (* TestSignedWrapping *)
@@ -567,9 +607,9 @@ structure TestUnsignedTrapping =
     local
       datatype z = datatype TestUtil.value
       structure A = UnsignedTrappingArith
-      val check1 = TestUtil.check1 "UnsignedTrappingArith"
-      val check2 = TestUtil.check2 "UnsignedTrappingArith"
-      val checkCmp = TestUtil.checkCmp "UnsignedTrappingArith"
+      val check1 = TestUtil.check1 "UnsignedTrappingArith" 3
+      val check2 = TestUtil.check2 "UnsignedTrappingArith" 3
+      val checkCmp = TestUtil.checkCmp "UnsignedTrappingArith" 3
       val narrow = check1 "uNarrow" A.uNarrow
       val toUnsigned = check1 "toUnsigned" A.toUnsigned
       val add = check2 "+" A.uAdd
@@ -590,200 +630,200 @@ structure TestUnsignedTrapping =
     in
     fun test () = (
 	  List.app narrow [
-	      (3, 0, INT 0), (3, 1, INT 1), (3, 2, INT 2), (3, 3, INT 3), (3, 4, INT 4),
-	      (3, 5, INT 5), (3, 6, INT 6), (3, 7, INT 7), (3, 8, OVFL_EXN), (3, 9, OVFL_EXN)
+	      (0, INT 0), (1, INT 1), (2, INT 2), (3, INT 3), (4, INT 4),
+	      (5, INT 5), (6, INT 6), (7, INT 7), (8, OVFL_EXN), (9, OVFL_EXN)
 	    ];
 	  List.app toUnsigned [
-	      (3, ~5, INT 3), (3, ~4, INT 4), (3, ~3, INT 5), (3, ~2, INT 6), (3, ~1, INT 7),
-	      (3,  0, INT 0), (3,  1, INT 1), (3,  2, INT 2), (3,  3, INT 3), (3,  4, INT 4)
+	      (~5, INT 3), (~4, INT 4), (~3, INT 5), (~2, INT 6), (~1, INT 7),
+	      ( 0, INT 0), ( 1, INT 1), ( 2, INT 2), ( 3, INT 3), ( 4, INT 4)
 	    ];
 	  List.app add [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
-	      (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 2),   (3, 1, 2, INT 3),   (3, 1, 3, INT 4),
-	      (3, 1, 4, INT 5),   (3, 1, 5, INT 6),   (3, 1, 6, INT 7),   (3, 1, 7, OVFLW),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 3),   (3, 2, 2, INT 4),   (3, 2, 3, INT 5),
-	      (3, 2, 4, INT 6),   (3, 2, 5, INT 7),   (3, 2, 6, OVFLW),   (3, 2, 7, OVFLW),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 4),   (3, 3, 2, INT 5),   (3, 3, 3, INT 6),
-	      (3, 3, 4, INT 7),   (3, 3, 5, OVFLW),   (3, 3, 6, OVFLW),   (3, 3, 7, OVFLW),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 5),   (3, 4, 2, INT 6),   (3, 4, 3, INT 7),
-	      (3, 4, 4, OVFLW),   (3, 4, 5, OVFLW),   (3, 4, 6, OVFLW),   (3, 4, 7, OVFLW),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 6),   (3, 5, 2, INT 7),   (3, 5, 3, OVFLW),
-	      (3, 5, 4, OVFLW),   (3, 5, 5, OVFLW),   (3, 5, 6, OVFLW),   (3, 5, 7, OVFLW),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 7),   (3, 6, 2, OVFLW),   (3, 6, 3, OVFLW),
-	      (3, 6, 4, OVFLW),   (3, 6, 5, OVFLW),   (3, 6, 6, OVFLW),   (3, 6, 7, OVFLW),
-	      (3, 7, 0, INT 7),   (3, 7, 1, OVFLW),   (3, 7, 2, OVFLW),   (3, 7, 3, OVFLW),
-	      (3, 7, 4, OVFLW),   (3, 7, 5, OVFLW),   (3, 7, 6, OVFLW),   (3, 7, 7, OVFLW)
+	      (0, 0, INT 0),   (0, 1, INT 1),   (0, 2, INT 2),   (0, 3, INT 3),
+	      (0, 4, INT 4),   (0, 5, INT 5),   (0, 6, INT 6),   (0, 7, INT 7),
+	      (1, 0, INT 1),   (1, 1, INT 2),   (1, 2, INT 3),   (1, 3, INT 4),
+	      (1, 4, INT 5),   (1, 5, INT 6),   (1, 6, INT 7),   (1, 7, OVFLW),
+	      (2, 0, INT 2),   (2, 1, INT 3),   (2, 2, INT 4),   (2, 3, INT 5),
+	      (2, 4, INT 6),   (2, 5, INT 7),   (2, 6, OVFLW),   (2, 7, OVFLW),
+	      (3, 0, INT 3),   (3, 1, INT 4),   (3, 2, INT 5),   (3, 3, INT 6),
+	      (3, 4, INT 7),   (3, 5, OVFLW),   (3, 6, OVFLW),   (3, 7, OVFLW),
+	      (4, 0, INT 4),   (4, 1, INT 5),   (4, 2, INT 6),   (4, 3, INT 7),
+	      (4, 4, OVFLW),   (4, 5, OVFLW),   (4, 6, OVFLW),   (4, 7, OVFLW),
+	      (5, 0, INT 5),   (5, 1, INT 6),   (5, 2, INT 7),   (5, 3, OVFLW),
+	      (5, 4, OVFLW),   (5, 5, OVFLW),   (5, 6, OVFLW),   (5, 7, OVFLW),
+	      (6, 0, INT 6),   (6, 1, INT 7),   (6, 2, OVFLW),   (6, 3, OVFLW),
+	      (6, 4, OVFLW),   (6, 5, OVFLW),   (6, 6, OVFLW),   (6, 7, OVFLW),
+	      (7, 0, INT 7),   (7, 1, OVFLW),   (7, 2, OVFLW),   (7, 3, OVFLW),
+	      (7, 4, OVFLW),   (7, 5, OVFLW),   (7, 6, OVFLW),   (7, 7, OVFLW)
 	    ];
 	  List.app sub [
-	      (3, 0, 0, INT 0),   (3, 0, 1, OVFLW),   (3, 0, 2, OVFLW),   (3, 0, 3, OVFLW),
-	      (3, 0, 4, OVFLW),   (3, 0, 5, OVFLW),   (3, 0, 6, OVFLW),   (3, 0, 7, OVFLW),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, OVFLW),   (3, 1, 3,OVFLW),
-	      (3, 1, 4, OVFLW),   (3, 1, 5, OVFLW),   (3, 1, 6, OVFLW),   (3, 1, 7, OVFLW),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 1),   (3, 2, 2, INT 0),   (3, 2, 3, OVFLW),
-	      (3, 2, 4, OVFLW),   (3, 2, 5, OVFLW),   (3, 2, 6, OVFLW),   (3, 2, 7, OVFLW),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 2),   (3, 3, 2, INT 1),   (3, 3, 3, INT 0),
-	      (3, 3, 4, OVFLW),   (3, 3, 5, OVFLW),   (3, 3, 6, OVFLW),   (3, 3, 7, OVFLW),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 3),   (3, 4, 2, INT 2),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 0),   (3, 4, 5, OVFLW),   (3, 4, 6, OVFLW),   (3, 4, 7, OVFLW),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 4),   (3, 5, 2, INT 3),   (3, 5, 3, INT 2),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, OVFLW),   (3, 5, 7, OVFLW),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 5),   (3, 6, 2, INT 4),   (3, 6, 3, INT 3),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, OVFLW),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 6),   (3, 7, 2, INT 5),   (3, 7, 3, INT 4),
-	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
+	      (0, 0, INT 0),   (0, 1, OVFLW),   (0, 2, OVFLW),   (0, 3, OVFLW),
+	      (0, 4, OVFLW),   (0, 5, OVFLW),   (0, 6, OVFLW),   (0, 7, OVFLW),
+	      (1, 0, INT 1),   (1, 1, INT 0),   (1, 2, OVFLW),   (1, 3,OVFLW),
+	      (1, 4, OVFLW),   (1, 5, OVFLW),   (1, 6, OVFLW),   (1, 7, OVFLW),
+	      (2, 0, INT 2),   (2, 1, INT 1),   (2, 2, INT 0),   (2, 3, OVFLW),
+	      (2, 4, OVFLW),   (2, 5, OVFLW),   (2, 6, OVFLW),   (2, 7, OVFLW),
+	      (3, 0, INT 3),   (3, 1, INT 2),   (3, 2, INT 1),   (3, 3, INT 0),
+	      (3, 4, OVFLW),   (3, 5, OVFLW),   (3, 6, OVFLW),   (3, 7, OVFLW),
+	      (4, 0, INT 4),   (4, 1, INT 3),   (4, 2, INT 2),   (4, 3, INT 1),
+	      (4, 4, INT 0),   (4, 5, OVFLW),   (4, 6, OVFLW),   (4, 7, OVFLW),
+	      (5, 0, INT 5),   (5, 1, INT 4),   (5, 2, INT 3),   (5, 3, INT 2),
+	      (5, 4, INT 1),   (5, 5, INT 0),   (5, 6, OVFLW),   (5, 7, OVFLW),
+	      (6, 0, INT 6),   (6, 1, INT 5),   (6, 2, INT 4),   (6, 3, INT 3),
+	      (6, 4, INT 2),   (6, 5, INT 1),   (6, 6, INT 0),   (6, 7, OVFLW),
+	      (7, 0, INT 7),   (7, 1, INT 6),   (7, 2, INT 5),   (7, 3, INT 4),
+	      (7, 4, INT 3),   (7, 5, INT 2),   (7, 6, INT 1),   (7, 7, INT 0)
 	    ];
 	  List.app mul [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, INT 0),   (3, 1, 1, INT 1),   (3, 1, 2, INT 2),   (3, 1, 3, INT 3),
-	      (3, 1, 4, INT 4),   (3, 1, 5, INT 5),   (3, 1, 6, INT 6),   (3, 1, 7, INT 7),
-	      (3, 2, 0, INT 0),   (3, 2, 1, INT 2),   (3, 2, 2, INT 4),   (3, 2, 3, INT 6),
-	      (3, 2, 4, OVFLW),   (3, 2, 5, OVFLW),   (3, 2, 6, OVFLW),   (3, 2, 7, OVFLW),
-	      (3, 3, 0, INT 0),   (3, 3, 1, INT 3),   (3, 3, 2, INT 6),   (3, 3, 3, OVFLW),
-	      (3, 3, 4, OVFLW),   (3, 3, 5, OVFLW),   (3, 3, 6, OVFLW),   (3, 3, 7, OVFLW),
-	      (3, 4, 0, INT 0),   (3, 4, 1, INT 4),   (3, 4, 2, OVFLW),   (3, 4, 3, OVFLW),
-	      (3, 4, 4, OVFLW),   (3, 4, 5, OVFLW),   (3, 4, 6, OVFLW),   (3, 4, 7, OVFLW),
-	      (3, 5, 0, INT 0),   (3, 5, 1, INT 5),   (3, 5, 2, OVFLW),   (3, 5, 3, OVFLW),
-	      (3, 5, 4, OVFLW),   (3, 5, 5, OVFLW),   (3, 5, 6, OVFLW),   (3, 5, 7, OVFLW),
-	      (3, 6, 0, INT 0),   (3, 6, 1, INT 6),   (3, 6, 2, OVFLW),   (3, 6, 3, OVFLW),
-	      (3, 6, 4, OVFLW),   (3, 6, 5, OVFLW),   (3, 6, 6, OVFLW),   (3, 6, 7, OVFLW),
-	      (3, 7, 0, INT 0),   (3, 7, 1, INT 7),   (3, 7, 2, OVFLW),   (3, 7, 3, OVFLW),
-	      (3, 7, 4, OVFLW),   (3, 7, 5, OVFLW),   (3, 7, 6, OVFLW),   (3, 7, 7, OVFLW)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, INT 0),   (1, 1, INT 1),   (1, 2, INT 2),   (1, 3, INT 3),
+	      (1, 4, INT 4),   (1, 5, INT 5),   (1, 6, INT 6),   (1, 7, INT 7),
+	      (2, 0, INT 0),   (2, 1, INT 2),   (2, 2, INT 4),   (2, 3, INT 6),
+	      (2, 4, OVFLW),   (2, 5, OVFLW),   (2, 6, OVFLW),   (2, 7, OVFLW),
+	      (3, 0, INT 0),   (3, 1, INT 3),   (3, 2, INT 6),   (3, 3, OVFLW),
+	      (3, 4, OVFLW),   (3, 5, OVFLW),   (3, 6, OVFLW),   (3, 7, OVFLW),
+	      (4, 0, INT 0),   (4, 1, INT 4),   (4, 2, OVFLW),   (4, 3, OVFLW),
+	      (4, 4, OVFLW),   (4, 5, OVFLW),   (4, 6, OVFLW),   (4, 7, OVFLW),
+	      (5, 0, INT 0),   (5, 1, INT 5),   (5, 2, OVFLW),   (5, 3, OVFLW),
+	      (5, 4, OVFLW),   (5, 5, OVFLW),   (5, 6, OVFLW),   (5, 7, OVFLW),
+	      (6, 0, INT 0),   (6, 1, INT 6),   (6, 2, OVFLW),   (6, 3, OVFLW),
+	      (6, 4, OVFLW),   (6, 5, OVFLW),   (6, 6, OVFLW),   (6, 7, OVFLW),
+	      (7, 0, INT 0),   (7, 1, INT 7),   (7, 2, OVFLW),   (7, 3, OVFLW),
+	      (7, 4, OVFLW),   (7, 5, OVFLW),   (7, 6, OVFLW),   (7, 7, OVFLW)
 	    ];
 	  List.app div' [
-	      (3, 0, 0, DIVZ),    (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, DIVZ),    (3, 1, 1, INT 1),   (3, 1, 2, INT 0),   (3, 1, 3, INT 0),
-	      (3, 1, 4, INT 0),   (3, 1, 5, INT 0),   (3, 1, 6, INT 0),   (3, 1, 7, INT 0),
-	      (3, 2, 0, DIVZ),    (3, 2, 1, INT 2),   (3, 2, 2, INT 1),   (3, 2, 3, INT 0),
-	      (3, 2, 4, INT 0),   (3, 2, 5, INT 0),   (3, 2, 6, INT 0),   (3, 2, 7, INT 0),
-	      (3, 3, 0, DIVZ),    (3, 3, 1, INT 3),   (3, 3, 2, INT 1),   (3, 3, 3, INT 1),
-	      (3, 3, 4, INT 0),   (3, 3, 5, INT 0),   (3, 3, 6, INT 0),   (3, 3, 7, INT 0),
-	      (3, 4, 0, DIVZ),    (3, 4, 1, INT 4),   (3, 4, 2, INT 2),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 1),   (3, 4, 5, INT 0),   (3, 4, 6, INT 0),   (3, 4, 7, INT 0),
-	      (3, 5, 0, DIVZ),    (3, 5, 1, INT 5),   (3, 5, 2, INT 2),   (3, 5, 3, INT 1),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 1),   (3, 5, 6, INT 0),   (3, 5, 7, INT 0),
-	      (3, 6, 0, DIVZ),    (3, 6, 1, INT 6),   (3, 6, 2, INT 3),   (3, 6, 3, INT 2),
-	      (3, 6, 4, INT 1),   (3, 6, 5, INT 1),   (3, 6, 6, INT 1),   (3, 6, 7, INT 0),
-	      (3, 7, 0, DIVZ),    (3, 7, 1, INT 7),   (3, 7, 2, INT 3),   (3, 7, 3, INT 2),
-	      (3, 7, 4, INT 1),   (3, 7, 5, INT 1),   (3, 7, 6, INT 1),   (3, 7, 7, INT 1)
+	      (0, 0, DIVZ),    (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, DIVZ),    (1, 1, INT 1),   (1, 2, INT 0),   (1, 3, INT 0),
+	      (1, 4, INT 0),   (1, 5, INT 0),   (1, 6, INT 0),   (1, 7, INT 0),
+	      (2, 0, DIVZ),    (2, 1, INT 2),   (2, 2, INT 1),   (2, 3, INT 0),
+	      (2, 4, INT 0),   (2, 5, INT 0),   (2, 6, INT 0),   (2, 7, INT 0),
+	      (3, 0, DIVZ),    (3, 1, INT 3),   (3, 2, INT 1),   (3, 3, INT 1),
+	      (3, 4, INT 0),   (3, 5, INT 0),   (3, 6, INT 0),   (3, 7, INT 0),
+	      (4, 0, DIVZ),    (4, 1, INT 4),   (4, 2, INT 2),   (4, 3, INT 1),
+	      (4, 4, INT 1),   (4, 5, INT 0),   (4, 6, INT 0),   (4, 7, INT 0),
+	      (5, 0, DIVZ),    (5, 1, INT 5),   (5, 2, INT 2),   (5, 3, INT 1),
+	      (5, 4, INT 1),   (5, 5, INT 1),   (5, 6, INT 0),   (5, 7, INT 0),
+	      (6, 0, DIVZ),    (6, 1, INT 6),   (6, 2, INT 3),   (6, 3, INT 2),
+	      (6, 4, INT 1),   (6, 5, INT 1),   (6, 6, INT 1),   (6, 7, INT 0),
+	      (7, 0, DIVZ),    (7, 1, INT 7),   (7, 2, INT 3),   (7, 3, INT 2),
+	      (7, 4, INT 1),   (7, 5, INT 1),   (7, 6, INT 1),   (7, 7, INT 1)
 	    ];
 	  List.app mod' [
-	      (3, 0, 0, DIVZ),    (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, DIVZ),    (3, 1, 1, INT 0),   (3, 1, 2, INT 1),   (3, 1, 3, INT 1),
-	      (3, 1, 4, INT 1),   (3, 1, 5, INT 1),   (3, 1, 6, INT 1),   (3, 1, 7, INT 1),
-	      (3, 2, 0, DIVZ),    (3, 2, 1, INT 0),   (3, 2, 2, INT 0),   (3, 2, 3, INT 2),
-	      (3, 2, 4, INT 2),   (3, 2, 5, INT 2),   (3, 2, 6, INT 2),   (3, 2, 7, INT 2),
-	      (3, 3, 0, DIVZ),    (3, 3, 1, INT 0),   (3, 3, 2, INT 1),   (3, 3, 3, INT 0),
-	      (3, 3, 4, INT 3),   (3, 3, 5, INT 3),   (3, 3, 6, INT 3),   (3, 3, 7, INT 3),
-	      (3, 4, 0, DIVZ),    (3, 4, 1, INT 0),   (3, 4, 2, INT 0),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 0),   (3, 4, 5, INT 4),   (3, 4, 6, INT 4),   (3, 4, 7, INT 4),
-	      (3, 5, 0, DIVZ),    (3, 5, 1, INT 0),   (3, 5, 2, INT 1),   (3, 5, 3, INT 2),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, INT 5),   (3, 5, 7, INT 5),
-	      (3, 6, 0, DIVZ),    (3, 6, 1, INT 0),   (3, 6, 2, INT 0),   (3, 6, 3, INT 0),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, INT 6),
-	      (3, 7, 0, DIVZ),    (3, 7, 1, INT 0),   (3, 7, 2, INT 1),   (3, 7, 3, INT 1),
-	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
+	      (0, 0, DIVZ),    (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, DIVZ),    (1, 1, INT 0),   (1, 2, INT 1),   (1, 3, INT 1),
+	      (1, 4, INT 1),   (1, 5, INT 1),   (1, 6, INT 1),   (1, 7, INT 1),
+	      (2, 0, DIVZ),    (2, 1, INT 0),   (2, 2, INT 0),   (2, 3, INT 2),
+	      (2, 4, INT 2),   (2, 5, INT 2),   (2, 6, INT 2),   (2, 7, INT 2),
+	      (3, 0, DIVZ),    (3, 1, INT 0),   (3, 2, INT 1),   (3, 3, INT 0),
+	      (3, 4, INT 3),   (3, 5, INT 3),   (3, 6, INT 3),   (3, 7, INT 3),
+	      (4, 0, DIVZ),    (4, 1, INT 0),   (4, 2, INT 0),   (4, 3, INT 1),
+	      (4, 4, INT 0),   (4, 5, INT 4),   (4, 6, INT 4),   (4, 7, INT 4),
+	      (5, 0, DIVZ),    (5, 1, INT 0),   (5, 2, INT 1),   (5, 3, INT 2),
+	      (5, 4, INT 1),   (5, 5, INT 0),   (5, 6, INT 5),   (5, 7, INT 5),
+	      (6, 0, DIVZ),    (6, 1, INT 0),   (6, 2, INT 0),   (6, 3, INT 0),
+	      (6, 4, INT 2),   (6, 5, INT 1),   (6, 6, INT 0),   (6, 7, INT 6),
+	      (7, 0, DIVZ),    (7, 1, INT 0),   (7, 2, INT 1),   (7, 3, INT 1),
+	      (7, 4, INT 3),   (7, 5, INT 2),   (7, 6, INT 1),   (7, 7, INT 0)
 	    ];
           List.app uShL [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 2),   (3, 1, 2, INT 4),   (3, 1, 3, OVFLW),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 4),   (3, 2, 2, OVFLW),   (3, 2, 3, OVFLW),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 6),   (3, 3, 2, OVFLW),   (3, 3, 3, OVFLW),
-	      (3, 4, 0, INT 4),   (3, 4, 1, OVFLW),   (3, 4, 2, OVFLW),   (3, 4, 3, OVFLW),
-	      (3, 5, 0, INT 5),   (3, 5, 1, OVFLW),   (3, 5, 2, OVFLW),   (3, 5, 3, OVFLW),
-	      (3, 6, 0, INT 6),   (3, 6, 1, OVFLW),   (3, 6, 2, OVFLW),   (3, 6, 3, OVFLW),
-	      (3, 7, 0, INT 7),   (3, 7, 1, OVFLW),   (3, 7, 2, OVFLW),   (3, 7, 3, OVFLW)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (1, 0, INT 1),   (1, 1, INT 2),   (1, 2, INT 4),   (1, 3, OVFLW),
+	      (2, 0, INT 2),   (2, 1, INT 4),   (2, 2, OVFLW),   (2, 3, OVFLW),
+	      (3, 0, INT 3),   (3, 1, INT 6),   (3, 2, OVFLW),   (3, 3, OVFLW),
+	      (4, 0, INT 4),   (4, 1, OVFLW),   (4, 2, OVFLW),   (4, 3, OVFLW),
+	      (5, 0, INT 5),   (5, 1, OVFLW),   (5, 2, OVFLW),   (5, 3, OVFLW),
+	      (6, 0, INT 6),   (6, 1, OVFLW),   (6, 2, OVFLW),   (6, 3, OVFLW),
+	      (7, 0, INT 7),   (7, 1, OVFLW),   (7, 2, OVFLW),   (7, 3, OVFLW)
 	    ];
           List.app uShR [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, INT 0),   (3, 1, 3, INT 0),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 1),   (3, 2, 2, INT 0),   (3, 2, 3, INT 0),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 1),   (3, 3, 2, INT 0),   (3, 3, 3, INT 0),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 2),   (3, 4, 2, INT 1),   (3, 4, 3, INT 0),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 2),   (3, 5, 2, INT 1),   (3, 5, 3, INT 0),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 3),   (3, 6, 2, INT 1),   (3, 6, 3, INT 0),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 3),   (3, 7, 2, INT 1),   (3, 7, 3, INT 0)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (1, 0, INT 1),   (1, 1, INT 0),   (1, 2, INT 0),   (1, 3, INT 0),
+	      (2, 0, INT 2),   (2, 1, INT 1),   (2, 2, INT 0),   (2, 3, INT 0),
+	      (3, 0, INT 3),   (3, 1, INT 1),   (3, 2, INT 0),   (3, 3, INT 0),
+	      (4, 0, INT 4),   (4, 1, INT 2),   (4, 2, INT 1),   (4, 3, INT 0),
+	      (5, 0, INT 5),   (5, 1, INT 2),   (5, 2, INT 1),   (5, 3, INT 0),
+	      (6, 0, INT 6),   (6, 1, INT 3),   (6, 2, INT 1),   (6, 3, INT 0),
+	      (7, 0, INT 7),   (7, 1, INT 3),   (7, 2, INT 1),   (7, 3, INT 0)
 	    ];
 	  List.app neg [
-	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
-	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
+	      (0, INT 0), (1, INT 7), (2, INT 6), (3, INT 5), (4, INT 4),
+	      (5, INT 3), (6, INT 2), (7, INT 1)
 	    ];
 	  List.app eq [
-	      (3, ~4, ~4, TRUE), (3, ~4, ~3, FALS), (3, ~4, ~2, FALS), (3, ~4, ~1, FALS),
-	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, FALS), (3, ~3, ~1, FALS),
-	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-              (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-              (3, ~4,  4, TRUE), (3, ~4,  5, FALS), (3, ~4,  6, FALS), (3, ~4,  7, FALS),
-              (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-              (3, ~3,  4, FALS), (3, ~3,  5, TRUE), (3, ~3,  6, FALS), (3, ~3,  7, FALS),
-              (3, ~2,  0, FALS), (3, ~2,  1, FALS), (3, ~2,  2, FALS), (3, ~2,  3, FALS),
-              (3, ~2,  4, FALS), (3, ~2,  5, FALS), (3, ~2,  6, TRUE), (3, ~2,  7, FALS),
-              (3, ~1,  0, FALS), (3, ~1,  1, FALS), (3, ~1,  2, FALS), (3, ~1,  3, FALS),
-              (3, ~1,  4, FALS), (3, ~1,  5, FALS), (3, ~1,  6, FALS), (3, ~1,  7, TRUE),
-	      (3, 0, 0, TRUE),   (3, 0, 1, FALS),   (3, 0, 2, FALS),   (3, 0, 3, FALS),
-	      (3, 0, 4, FALS),   (3, 0, 5, FALS),   (3, 0, 6, FALS),   (3, 0, 7, FALS),
-	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, FALS),   (3, 1, 3, FALS),
-	      (3, 1, 4, FALS),   (3, 1, 5, FALS),   (3, 1, 6, FALS),   (3, 1, 7, FALS),
-	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, FALS),
-	      (3, 2, 4, FALS),   (3, 2, 5, FALS),   (3, 2, 6, FALS),   (3, 2, 7, FALS),
-	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
-	      (3, 3, 4, FALS),   (3, 3, 5, FALS),   (3, 3, 6, FALS),   (3, 3, 7, FALS),
-	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
-	      (3, 4, 4, TRUE),   (3, 4, 5, FALS),   (3, 4, 6, FALS),   (3, 4, 7, FALS),
-	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
-	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, FALS),   (3, 5, 7, FALS),
-	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
-	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, FALS),
-	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
-	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
+	      (~4, ~4, TRUE), (~4, ~3, FALS), (~4, ~2, FALS), (~4, ~1, FALS),
+	      (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+	      (~3, ~4, FALS), (~3, ~3, TRUE), (~3, ~2, FALS), (~3, ~1, FALS),
+	      (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+              (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+              (~4,  4, TRUE), (~4,  5, FALS), (~4,  6, FALS), (~4,  7, FALS),
+              (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+              (~3,  4, FALS), (~3,  5, TRUE), (~3,  6, FALS), (~3,  7, FALS),
+              (~2,  0, FALS), (~2,  1, FALS), (~2,  2, FALS), (~2,  3, FALS),
+              (~2,  4, FALS), (~2,  5, FALS), (~2,  6, TRUE), (~2,  7, FALS),
+              (~1,  0, FALS), (~1,  1, FALS), (~1,  2, FALS), (~1,  3, FALS),
+              (~1,  4, FALS), (~1,  5, FALS), (~1,  6, FALS), (~1,  7, TRUE),
+	      (0, 0, TRUE),   (0, 1, FALS),   (0, 2, FALS),   (0, 3, FALS),
+	      (0, 4, FALS),   (0, 5, FALS),   (0, 6, FALS),   (0, 7, FALS),
+	      (1, 0, FALS),   (1, 1, TRUE),   (1, 2, FALS),   (1, 3, FALS),
+	      (1, 4, FALS),   (1, 5, FALS),   (1, 6, FALS),   (1, 7, FALS),
+	      (2, 0, FALS),   (2, 1, FALS),   (2, 2, TRUE),   (2, 3, FALS),
+	      (2, 4, FALS),   (2, 5, FALS),   (2, 6, FALS),   (2, 7, FALS),
+	      (3, 0, FALS),   (3, 1, FALS),   (3, 2, FALS),   (3, 3, TRUE),
+	      (3, 4, FALS),   (3, 5, FALS),   (3, 6, FALS),   (3, 7, FALS),
+	      (4, 0, FALS),   (4, 1, FALS),   (4, 2, FALS),   (4, 3, FALS),
+	      (4, 4, TRUE),   (4, 5, FALS),   (4, 6, FALS),   (4, 7, FALS),
+	      (5, 0, FALS),   (5, 1, FALS),   (5, 2, FALS),   (5, 3, FALS),
+	      (5, 4, FALS),   (5, 5, TRUE),   (5, 6, FALS),   (5, 7, FALS),
+	      (6, 0, FALS),   (6, 1, FALS),   (6, 2, FALS),   (6, 3, FALS),
+	      (6, 4, FALS),   (6, 5, FALS),   (6, 6, TRUE),   (6, 7, FALS),
+	      (7, 0, FALS),   (7, 1, FALS),   (7, 2, FALS),   (7, 3, FALS),
+	      (7, 4, FALS),   (7, 5, FALS),   (7, 6, FALS),   (7, 7, TRUE)
 	    ];
 	  List.app less [
-	      (3, ~4, ~4, FALS), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
-	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-	      (3, ~3, ~4, FALS), (3, ~3, ~3, FALS), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
-	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-	      (3, 0, 0, FALS),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
-	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
-	      (3, 1, 0, FALS),   (3, 1, 1, FALS),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
-	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
-	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, FALS),   (3, 2, 3, TRUE),
-	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
-	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, FALS),
-	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
-	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
-	      (3, 4, 4, FALS),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
-	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
-	      (3, 5, 4, FALS),   (3, 5, 5, FALS),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
-	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
-	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, FALS),   (3, 6, 7, TRUE),
-	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
-	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, FALS)
+	      (~4, ~4, FALS), (~4, ~3, TRUE), (~4, ~2, TRUE), (~4, ~1, TRUE),
+	      (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+	      (~3, ~4, FALS), (~3, ~3, FALS), (~3, ~2, TRUE), (~3, ~1, TRUE),
+	      (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+	      (0, 0, FALS),   (0, 1, TRUE),   (0, 2, TRUE),   (0, 3, TRUE),
+	      (0, 4, TRUE),   (0, 5, TRUE),   (0, 6, TRUE),   (0, 7, TRUE),
+	      (1, 0, FALS),   (1, 1, FALS),   (1, 2, TRUE),   (1, 3, TRUE),
+	      (1, 4, TRUE),   (1, 5, TRUE),   (1, 6, TRUE),   (1, 7, TRUE),
+	      (2, 0, FALS),   (2, 1, FALS),   (2, 2, FALS),   (2, 3, TRUE),
+	      (2, 4, TRUE),   (2, 5, TRUE),   (2, 6, TRUE),   (2, 7, TRUE),
+	      (3, 0, FALS),   (3, 1, FALS),   (3, 2, FALS),   (3, 3, FALS),
+	      (3, 4, TRUE),   (3, 5, TRUE),   (3, 6, TRUE),   (3, 7, TRUE),
+	      (4, 0, FALS),   (4, 1, FALS),   (4, 2, FALS),   (4, 3, FALS),
+	      (4, 4, FALS),   (4, 5, TRUE),   (4, 6, TRUE),   (4, 7, TRUE),
+	      (5, 0, FALS),   (5, 1, FALS),   (5, 2, FALS),   (5, 3, FALS),
+	      (5, 4, FALS),   (5, 5, FALS),   (5, 6, TRUE),   (5, 7, TRUE),
+	      (6, 0, FALS),   (6, 1, FALS),   (6, 2, FALS),   (6, 3, FALS),
+	      (6, 4, FALS),   (6, 5, FALS),   (6, 6, FALS),   (6, 7, TRUE),
+	      (7, 0, FALS),   (7, 1, FALS),   (7, 2, FALS),   (7, 3, FALS),
+	      (7, 4, FALS),   (7, 5, FALS),   (7, 6, FALS),   (7, 7, FALS)
 	    ];
 	  List.app lessEq [
-	      (3, ~4, ~4, TRUE), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
-	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
-	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-	      (3, 0, 0, TRUE),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
-	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
-	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
-	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
-	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, TRUE),
-	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
-	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
-	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
-	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
-	      (3, 4, 4, TRUE),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
-	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
-	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
-	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
-	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, TRUE),
-	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
-	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
+	      (~4, ~4, TRUE), (~4, ~3, TRUE), (~4, ~2, TRUE), (~4, ~1, TRUE),
+	      (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+	      (~3, ~4, FALS), (~3, ~3, TRUE), (~3, ~2, TRUE), (~3, ~1, TRUE),
+	      (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+	      (0, 0, TRUE),   (0, 1, TRUE),   (0, 2, TRUE),   (0, 3, TRUE),
+	      (0, 4, TRUE),   (0, 5, TRUE),   (0, 6, TRUE),   (0, 7, TRUE),
+	      (1, 0, FALS),   (1, 1, TRUE),   (1, 2, TRUE),   (1, 3, TRUE),
+	      (1, 4, TRUE),   (1, 5, TRUE),   (1, 6, TRUE),   (1, 7, TRUE),
+	      (2, 0, FALS),   (2, 1, FALS),   (2, 2, TRUE),   (2, 3, TRUE),
+	      (2, 4, TRUE),   (2, 5, TRUE),   (2, 6, TRUE),   (2, 7, TRUE),
+	      (3, 0, FALS),   (3, 1, FALS),   (3, 2, FALS),   (3, 3, TRUE),
+	      (3, 4, TRUE),   (3, 5, TRUE),   (3, 6, TRUE),   (3, 7, TRUE),
+	      (4, 0, FALS),   (4, 1, FALS),   (4, 2, FALS),   (4, 3, FALS),
+	      (4, 4, TRUE),   (4, 5, TRUE),   (4, 6, TRUE),   (4, 7, TRUE),
+	      (5, 0, FALS),   (5, 1, FALS),   (5, 2, FALS),   (5, 3, FALS),
+	      (5, 4, FALS),   (5, 5, TRUE),   (5, 6, TRUE),   (5, 7, TRUE),
+	      (6, 0, FALS),   (6, 1, FALS),   (6, 2, FALS),   (6, 3, FALS),
+	      (6, 4, FALS),   (6, 5, FALS),   (6, 6, TRUE),   (6, 7, TRUE),
+	      (7, 0, FALS),   (7, 1, FALS),   (7, 2, FALS),   (7, 3, FALS),
+	      (7, 4, FALS),   (7, 5, FALS),   (7, 6, FALS),   (7, 7, TRUE)
 	    ])
     end (* local *)
   end (* TestUnsignedTrapping *)
@@ -793,9 +833,9 @@ structure TestUnsignedWrapping =
     local
       datatype z = datatype TestUtil.value
       structure A = UnsignedWrappingArith
-      val check1 = TestUtil.check1 "UnsignedWrappingArith"
-      val check2 = TestUtil.check2 "UnsignedWrappingArith"
-      val checkCmp = TestUtil.checkCmp "UnsignedWrappingArith"
+      val check1 = TestUtil.check1 "UnsignedWrappingArith" 3
+      val check2 = TestUtil.check2 "UnsignedWrappingArith" 3
+      val checkCmp = TestUtil.checkCmp "UnsignedWrappingArith" 3
       val narrow = check1 "uNarrow" A.uNarrow
       val toUnsigned = check1 "toUnsigned" A.toUnsigned
       val add = check2 "+" A.uAdd
@@ -815,200 +855,200 @@ structure TestUnsignedWrapping =
     in
     fun test () = (
 	  List.app narrow [
-	      (3, 0, INT 0), (3, 1, INT 1), (3, 2, INT 2), (3, 3, INT 3), (3, 4, INT 4),
-	      (3, 5, INT 5), (3, 6, INT 6), (3, 7, INT 7), (3, 8, INT 0), (3, 9, INT 1)
+	      (0, INT 0), (1, INT 1), (2, INT 2), (3, INT 3), (4, INT 4),
+	      (5, INT 5), (6, INT 6), (7, INT 7), (8, INT 0), (9, INT 1)
 	    ];
 	  List.app toUnsigned [
-	      (3, ~5, INT 3), (3, ~4, INT 4), (3, ~3, INT 5), (3, ~2, INT 6), (3, ~1, INT 7),
-	      (3,  0, INT 0), (3,  1, INT 1), (3,  2, INT 2), (3,  3, INT 3), (3,  4, INT 4)
+	      (~5, INT 3), (~4, INT 4), (~3, INT 5), (~2, INT 6), (~1, INT 7),
+	      ( 0, INT 0), ( 1, INT 1), ( 2, INT 2), ( 3, INT 3), ( 4, INT 4)
 	    ];
 	  List.app add [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 1),   (3, 0, 2, INT 2),   (3, 0, 3, INT 3),
-	      (3, 0, 4, INT 4),   (3, 0, 5, INT 5),   (3, 0, 6, INT 6),   (3, 0, 7, INT 7),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 2),   (3, 1, 2, INT 3),   (3, 1, 3, INT 4),
-	      (3, 1, 4, INT 5),   (3, 1, 5, INT 6),   (3, 1, 6, INT 7),   (3, 1, 7, INT 0),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 3),   (3, 2, 2, INT 4),   (3, 2, 3, INT 5),
-	      (3, 2, 4, INT 6),   (3, 2, 5, INT 7),   (3, 2, 6, INT 0),   (3, 2, 7, INT 1),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 4),   (3, 3, 2, INT 5),   (3, 3, 3, INT 6),
-	      (3, 3, 4, INT 7),   (3, 3, 5, INT 0),   (3, 3, 6, INT 1),   (3, 3, 7, INT 2),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 5),   (3, 4, 2, INT 6),   (3, 4, 3, INT 7),
-	      (3, 4, 4, INT 0),   (3, 4, 5, INT 1),   (3, 4, 6, INT 2),   (3, 4, 7, INT 3),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 6),   (3, 5, 2, INT 7),   (3, 5, 3, INT 0),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 2),   (3, 5, 6, INT 3),   (3, 5, 7, INT 4),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 7),   (3, 6, 2, INT 0),   (3, 6, 3, INT 1),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 3),   (3, 6, 6, INT 4),   (3, 6, 7, INT 5),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 0),   (3, 7, 2, INT 1),   (3, 7, 3, INT 2),
-	      (3, 7, 4, INT 3),   (3, 7, 5, INT 4),   (3, 7, 6, INT 5),   (3, 7, 7, INT 6)
+	      (0, 0, INT 0),   (0, 1, INT 1),   (0, 2, INT 2),   (0, 3, INT 3),
+	      (0, 4, INT 4),   (0, 5, INT 5),   (0, 6, INT 6),   (0, 7, INT 7),
+	      (1, 0, INT 1),   (1, 1, INT 2),   (1, 2, INT 3),   (1, 3, INT 4),
+	      (1, 4, INT 5),   (1, 5, INT 6),   (1, 6, INT 7),   (1, 7, INT 0),
+	      (2, 0, INT 2),   (2, 1, INT 3),   (2, 2, INT 4),   (2, 3, INT 5),
+	      (2, 4, INT 6),   (2, 5, INT 7),   (2, 6, INT 0),   (2, 7, INT 1),
+	      (3, 0, INT 3),   (3, 1, INT 4),   (3, 2, INT 5),   (3, 3, INT 6),
+	      (3, 4, INT 7),   (3, 5, INT 0),   (3, 6, INT 1),   (3, 7, INT 2),
+	      (4, 0, INT 4),   (4, 1, INT 5),   (4, 2, INT 6),   (4, 3, INT 7),
+	      (4, 4, INT 0),   (4, 5, INT 1),   (4, 6, INT 2),   (4, 7, INT 3),
+	      (5, 0, INT 5),   (5, 1, INT 6),   (5, 2, INT 7),   (5, 3, INT 0),
+	      (5, 4, INT 1),   (5, 5, INT 2),   (5, 6, INT 3),   (5, 7, INT 4),
+	      (6, 0, INT 6),   (6, 1, INT 7),   (6, 2, INT 0),   (6, 3, INT 1),
+	      (6, 4, INT 2),   (6, 5, INT 3),   (6, 6, INT 4),   (6, 7, INT 5),
+	      (7, 0, INT 7),   (7, 1, INT 0),   (7, 2, INT 1),   (7, 3, INT 2),
+	      (7, 4, INT 3),   (7, 5, INT 4),   (7, 6, INT 5),   (7, 7, INT 6)
 	    ];
 	  List.app sub [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 7),   (3, 0, 2, INT 6),   (3, 0, 3, INT 5),
-	      (3, 0, 4, INT 4),   (3, 0, 5, INT 3),   (3, 0, 6, INT 2),   (3, 0, 7, INT 1),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, INT 7),   (3, 1, 3, INT 6),
-	      (3, 1, 4, INT 5),   (3, 1, 5, INT 4),   (3, 1, 6, INT 3),   (3, 1, 7, INT 2),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 1),   (3, 2, 2, INT 0),   (3, 2, 3, INT 7),
-	      (3, 2, 4, INT 6),   (3, 2, 5, INT 5),   (3, 2, 6, INT 4),   (3, 2, 7, INT 3),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 2),   (3, 3, 2, INT 1),   (3, 3, 3, INT 0),
-	      (3, 3, 4, INT 7),   (3, 3, 5, INT 6),   (3, 3, 6, INT 5),   (3, 3, 7, INT 4),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 3),   (3, 4, 2, INT 2),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 0),   (3, 4, 5, INT 7),   (3, 4, 6, INT 6),   (3, 4, 7, INT 5),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 4),   (3, 5, 2, INT 3),   (3, 5, 3, INT 2),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, INT 7),   (3, 5, 7, INT 6),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 5),   (3, 6, 2, INT 4),   (3, 6, 3, INT 3),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, INT 7),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 6),   (3, 7, 2, INT 5),   (3, 7, 3, INT 4),
-	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
+	      (0, 0, INT 0),   (0, 1, INT 7),   (0, 2, INT 6),   (0, 3, INT 5),
+	      (0, 4, INT 4),   (0, 5, INT 3),   (0, 6, INT 2),   (0, 7, INT 1),
+	      (1, 0, INT 1),   (1, 1, INT 0),   (1, 2, INT 7),   (1, 3, INT 6),
+	      (1, 4, INT 5),   (1, 5, INT 4),   (1, 6, INT 3),   (1, 7, INT 2),
+	      (2, 0, INT 2),   (2, 1, INT 1),   (2, 2, INT 0),   (2, 3, INT 7),
+	      (2, 4, INT 6),   (2, 5, INT 5),   (2, 6, INT 4),   (2, 7, INT 3),
+	      (3, 0, INT 3),   (3, 1, INT 2),   (3, 2, INT 1),   (3, 3, INT 0),
+	      (3, 4, INT 7),   (3, 5, INT 6),   (3, 6, INT 5),   (3, 7, INT 4),
+	      (4, 0, INT 4),   (4, 1, INT 3),   (4, 2, INT 2),   (4, 3, INT 1),
+	      (4, 4, INT 0),   (4, 5, INT 7),   (4, 6, INT 6),   (4, 7, INT 5),
+	      (5, 0, INT 5),   (5, 1, INT 4),   (5, 2, INT 3),   (5, 3, INT 2),
+	      (5, 4, INT 1),   (5, 5, INT 0),   (5, 6, INT 7),   (5, 7, INT 6),
+	      (6, 0, INT 6),   (6, 1, INT 5),   (6, 2, INT 4),   (6, 3, INT 3),
+	      (6, 4, INT 2),   (6, 5, INT 1),   (6, 6, INT 0),   (6, 7, INT 7),
+	      (7, 0, INT 7),   (7, 1, INT 6),   (7, 2, INT 5),   (7, 3, INT 4),
+	      (7, 4, INT 3),   (7, 5, INT 2),   (7, 6, INT 1),   (7, 7, INT 0)
 	    ];
 	  List.app mul [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, INT 0),   (3, 1, 1, INT 1),   (3, 1, 2, INT 2),   (3, 1, 3, INT 3),
-	      (3, 1, 4, INT 4),   (3, 1, 5, INT 5),   (3, 1, 6, INT 6),   (3, 1, 7, INT 7),
-	      (3, 2, 0, INT 0),   (3, 2, 1, INT 2),   (3, 2, 2, INT 4),   (3, 2, 3, INT 6),
-	      (3, 2, 4, INT 0),   (3, 2, 5, INT 2),   (3, 2, 6, INT 4),   (3, 2, 7, INT 6),
-	      (3, 3, 0, INT 0),   (3, 3, 1, INT 3),   (3, 3, 2, INT 6),   (3, 3, 3, INT 1),
-	      (3, 3, 4, INT 4),   (3, 3, 5, INT 7),   (3, 3, 6, INT 2),   (3, 3, 7, INT 5),
-	      (3, 4, 0, INT 0),   (3, 4, 1, INT 4),   (3, 4, 2, INT 0),   (3, 4, 3, INT 4),
-	      (3, 4, 4, INT 0),   (3, 4, 5, INT 4),   (3, 4, 6, INT 0),   (3, 4, 7, INT 4),
-	      (3, 5, 0, INT 0),   (3, 5, 1, INT 5),   (3, 5, 2, INT 2),   (3, 5, 3, INT 7),
-	      (3, 5, 4, INT 4),   (3, 5, 5, INT 1),   (3, 5, 6, INT 6),   (3, 5, 7, INT 3),
-	      (3, 6, 0, INT 0),   (3, 6, 1, INT 6),   (3, 6, 2, INT 4),   (3, 6, 3, INT 2),
-	      (3, 6, 4, INT 0),   (3, 6, 5, INT 6),   (3, 6, 6, INT 4),   (3, 6, 7, INT 2),
-	      (3, 7, 0, INT 0),   (3, 7, 1, INT 7),   (3, 7, 2, INT 6),   (3, 7, 3, INT 5),
-	      (3, 7, 4, INT 4),   (3, 7, 5, INT 3),   (3, 7, 6, INT 2),   (3, 7, 7, INT 1)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, INT 0),   (1, 1, INT 1),   (1, 2, INT 2),   (1, 3, INT 3),
+	      (1, 4, INT 4),   (1, 5, INT 5),   (1, 6, INT 6),   (1, 7, INT 7),
+	      (2, 0, INT 0),   (2, 1, INT 2),   (2, 2, INT 4),   (2, 3, INT 6),
+	      (2, 4, INT 0),   (2, 5, INT 2),   (2, 6, INT 4),   (2, 7, INT 6),
+	      (3, 0, INT 0),   (3, 1, INT 3),   (3, 2, INT 6),   (3, 3, INT 1),
+	      (3, 4, INT 4),   (3, 5, INT 7),   (3, 6, INT 2),   (3, 7, INT 5),
+	      (4, 0, INT 0),   (4, 1, INT 4),   (4, 2, INT 0),   (4, 3, INT 4),
+	      (4, 4, INT 0),   (4, 5, INT 4),   (4, 6, INT 0),   (4, 7, INT 4),
+	      (5, 0, INT 0),   (5, 1, INT 5),   (5, 2, INT 2),   (5, 3, INT 7),
+	      (5, 4, INT 4),   (5, 5, INT 1),   (5, 6, INT 6),   (5, 7, INT 3),
+	      (6, 0, INT 0),   (6, 1, INT 6),   (6, 2, INT 4),   (6, 3, INT 2),
+	      (6, 4, INT 0),   (6, 5, INT 6),   (6, 6, INT 4),   (6, 7, INT 2),
+	      (7, 0, INT 0),   (7, 1, INT 7),   (7, 2, INT 6),   (7, 3, INT 5),
+	      (7, 4, INT 4),   (7, 5, INT 3),   (7, 6, INT 2),   (7, 7, INT 1)
 	    ];
 	  List.app div' [
-	      (3, 0, 0, DIVZ),    (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, DIVZ),    (3, 1, 1, INT 1),   (3, 1, 2, INT 0),   (3, 1, 3, INT 0),
-	      (3, 1, 4, INT 0),   (3, 1, 5, INT 0),   (3, 1, 6, INT 0),   (3, 1, 7, INT 0),
-	      (3, 2, 0, DIVZ),    (3, 2, 1, INT 2),   (3, 2, 2, INT 1),   (3, 2, 3, INT 0),
-	      (3, 2, 4, INT 0),   (3, 2, 5, INT 0),   (3, 2, 6, INT 0),   (3, 2, 7, INT 0),
-	      (3, 3, 0, DIVZ),    (3, 3, 1, INT 3),   (3, 3, 2, INT 1),   (3, 3, 3, INT 1),
-	      (3, 3, 4, INT 0),   (3, 3, 5, INT 0),   (3, 3, 6, INT 0),   (3, 3, 7, INT 0),
-	      (3, 4, 0, DIVZ),    (3, 4, 1, INT 4),   (3, 4, 2, INT 2),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 1),   (3, 4, 5, INT 0),   (3, 4, 6, INT 0),   (3, 4, 7, INT 0),
-	      (3, 5, 0, DIVZ),    (3, 5, 1, INT 5),   (3, 5, 2, INT 2),   (3, 5, 3, INT 1),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 1),   (3, 5, 6, INT 0),   (3, 5, 7, INT 0),
-	      (3, 6, 0, DIVZ),    (3, 6, 1, INT 6),   (3, 6, 2, INT 3),   (3, 6, 3, INT 2),
-	      (3, 6, 4, INT 1),   (3, 6, 5, INT 1),   (3, 6, 6, INT 1),   (3, 6, 7, INT 0),
-	      (3, 7, 0, DIVZ),    (3, 7, 1, INT 7),   (3, 7, 2, INT 3),   (3, 7, 3, INT 2),
-	      (3, 7, 4, INT 1),   (3, 7, 5, INT 1),   (3, 7, 6, INT 1),   (3, 7, 7, INT 1)
+	      (0, 0, DIVZ),    (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, DIVZ),    (1, 1, INT 1),   (1, 2, INT 0),   (1, 3, INT 0),
+	      (1, 4, INT 0),   (1, 5, INT 0),   (1, 6, INT 0),   (1, 7, INT 0),
+	      (2, 0, DIVZ),    (2, 1, INT 2),   (2, 2, INT 1),   (2, 3, INT 0),
+	      (2, 4, INT 0),   (2, 5, INT 0),   (2, 6, INT 0),   (2, 7, INT 0),
+	      (3, 0, DIVZ),    (3, 1, INT 3),   (3, 2, INT 1),   (3, 3, INT 1),
+	      (3, 4, INT 0),   (3, 5, INT 0),   (3, 6, INT 0),   (3, 7, INT 0),
+	      (4, 0, DIVZ),    (4, 1, INT 4),   (4, 2, INT 2),   (4, 3, INT 1),
+	      (4, 4, INT 1),   (4, 5, INT 0),   (4, 6, INT 0),   (4, 7, INT 0),
+	      (5, 0, DIVZ),    (5, 1, INT 5),   (5, 2, INT 2),   (5, 3, INT 1),
+	      (5, 4, INT 1),   (5, 5, INT 1),   (5, 6, INT 0),   (5, 7, INT 0),
+	      (6, 0, DIVZ),    (6, 1, INT 6),   (6, 2, INT 3),   (6, 3, INT 2),
+	      (6, 4, INT 1),   (6, 5, INT 1),   (6, 6, INT 1),   (6, 7, INT 0),
+	      (7, 0, DIVZ),    (7, 1, INT 7),   (7, 2, INT 3),   (7, 3, INT 2),
+	      (7, 4, INT 1),   (7, 5, INT 1),   (7, 6, INT 1),   (7, 7, INT 1)
 	    ];
 	  List.app mod' [
-	      (3, 0, 0, DIVZ),    (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 0, 4, INT 0),   (3, 0, 5, INT 0),   (3, 0, 6, INT 0),   (3, 0, 7, INT 0),
-	      (3, 1, 0, DIVZ),    (3, 1, 1, INT 0),   (3, 1, 2, INT 1),   (3, 1, 3, INT 1),
-	      (3, 1, 4, INT 1),   (3, 1, 5, INT 1),   (3, 1, 6, INT 1),   (3, 1, 7, INT 1),
-	      (3, 2, 0, DIVZ),    (3, 2, 1, INT 0),   (3, 2, 2, INT 0),   (3, 2, 3, INT 2),
-	      (3, 2, 4, INT 2),   (3, 2, 5, INT 2),   (3, 2, 6, INT 2),   (3, 2, 7, INT 2),
-	      (3, 3, 0, DIVZ),    (3, 3, 1, INT 0),   (3, 3, 2, INT 1),   (3, 3, 3, INT 0),
-	      (3, 3, 4, INT 3),   (3, 3, 5, INT 3),   (3, 3, 6, INT 3),   (3, 3, 7, INT 3),
-	      (3, 4, 0, DIVZ),    (3, 4, 1, INT 0),   (3, 4, 2, INT 0),   (3, 4, 3, INT 1),
-	      (3, 4, 4, INT 0),   (3, 4, 5, INT 4),   (3, 4, 6, INT 4),   (3, 4, 7, INT 4),
-	      (3, 5, 0, DIVZ),    (3, 5, 1, INT 0),   (3, 5, 2, INT 1),   (3, 5, 3, INT 2),
-	      (3, 5, 4, INT 1),   (3, 5, 5, INT 0),   (3, 5, 6, INT 5),   (3, 5, 7, INT 5),
-	      (3, 6, 0, DIVZ),    (3, 6, 1, INT 0),   (3, 6, 2, INT 0),   (3, 6, 3, INT 0),
-	      (3, 6, 4, INT 2),   (3, 6, 5, INT 1),   (3, 6, 6, INT 0),   (3, 6, 7, INT 6),
-	      (3, 7, 0, DIVZ),    (3, 7, 1, INT 0),   (3, 7, 2, INT 1),   (3, 7, 3, INT 1),
-	      (3, 7, 4, INT 3),   (3, 7, 5, INT 2),   (3, 7, 6, INT 1),   (3, 7, 7, INT 0)
+	      (0, 0, DIVZ),    (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (0, 4, INT 0),   (0, 5, INT 0),   (0, 6, INT 0),   (0, 7, INT 0),
+	      (1, 0, DIVZ),    (1, 1, INT 0),   (1, 2, INT 1),   (1, 3, INT 1),
+	      (1, 4, INT 1),   (1, 5, INT 1),   (1, 6, INT 1),   (1, 7, INT 1),
+	      (2, 0, DIVZ),    (2, 1, INT 0),   (2, 2, INT 0),   (2, 3, INT 2),
+	      (2, 4, INT 2),   (2, 5, INT 2),   (2, 6, INT 2),   (2, 7, INT 2),
+	      (3, 0, DIVZ),    (3, 1, INT 0),   (3, 2, INT 1),   (3, 3, INT 0),
+	      (3, 4, INT 3),   (3, 5, INT 3),   (3, 6, INT 3),   (3, 7, INT 3),
+	      (4, 0, DIVZ),    (4, 1, INT 0),   (4, 2, INT 0),   (4, 3, INT 1),
+	      (4, 4, INT 0),   (4, 5, INT 4),   (4, 6, INT 4),   (4, 7, INT 4),
+	      (5, 0, DIVZ),    (5, 1, INT 0),   (5, 2, INT 1),   (5, 3, INT 2),
+	      (5, 4, INT 1),   (5, 5, INT 0),   (5, 6, INT 5),   (5, 7, INT 5),
+	      (6, 0, DIVZ),    (6, 1, INT 0),   (6, 2, INT 0),   (6, 3, INT 0),
+	      (6, 4, INT 2),   (6, 5, INT 1),   (6, 6, INT 0),   (6, 7, INT 6),
+	      (7, 0, DIVZ),    (7, 1, INT 0),   (7, 2, INT 1),   (7, 3, INT 1),
+	      (7, 4, INT 3),   (7, 5, INT 2),   (7, 6, INT 1),   (7, 7, INT 0)
 	    ];
           List.app uShL [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 2),   (3, 1, 2, INT 4),   (3, 1, 3, INT 0),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 4),   (3, 2, 2, INT 0),   (3, 2, 3, INT 0),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 6),   (3, 3, 2, INT 4),   (3, 3, 3, INT 0),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 0),   (3, 4, 2, INT 0),   (3, 4, 3, INT 0),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 2),   (3, 5, 2, INT 4),   (3, 5, 3, INT 0),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 4),   (3, 6, 2, INT 0),   (3, 6, 3, INT 0),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 6),   (3, 7, 2, INT 4),   (3, 7, 3, INT 0)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (1, 0, INT 1),   (1, 1, INT 2),   (1, 2, INT 4),   (1, 3, INT 0),
+	      (2, 0, INT 2),   (2, 1, INT 4),   (2, 2, INT 0),   (2, 3, INT 0),
+	      (3, 0, INT 3),   (3, 1, INT 6),   (3, 2, INT 4),   (3, 3, INT 0),
+	      (4, 0, INT 4),   (4, 1, INT 0),   (4, 2, INT 0),   (4, 3, INT 0),
+	      (5, 0, INT 5),   (5, 1, INT 2),   (5, 2, INT 4),   (5, 3, INT 0),
+	      (6, 0, INT 6),   (6, 1, INT 4),   (6, 2, INT 0),   (6, 3, INT 0),
+	      (7, 0, INT 7),   (7, 1, INT 6),   (7, 2, INT 4),   (7, 3, INT 0)
 	    ];
           List.app uShR [
-	      (3, 0, 0, INT 0),   (3, 0, 1, INT 0),   (3, 0, 2, INT 0),   (3, 0, 3, INT 0),
-	      (3, 1, 0, INT 1),   (3, 1, 1, INT 0),   (3, 1, 2, INT 0),   (3, 1, 3, INT 0),
-	      (3, 2, 0, INT 2),   (3, 2, 1, INT 1),   (3, 2, 2, INT 0),   (3, 2, 3, INT 0),
-	      (3, 3, 0, INT 3),   (3, 3, 1, INT 1),   (3, 3, 2, INT 0),   (3, 3, 3, INT 0),
-	      (3, 4, 0, INT 4),   (3, 4, 1, INT 2),   (3, 4, 2, INT 1),   (3, 4, 3, INT 0),
-	      (3, 5, 0, INT 5),   (3, 5, 1, INT 2),   (3, 5, 2, INT 1),   (3, 5, 3, INT 0),
-	      (3, 6, 0, INT 6),   (3, 6, 1, INT 3),   (3, 6, 2, INT 1),   (3, 6, 3, INT 0),
-	      (3, 7, 0, INT 7),   (3, 7, 1, INT 3),   (3, 7, 2, INT 1),   (3, 7, 3, INT 0)
+	      (0, 0, INT 0),   (0, 1, INT 0),   (0, 2, INT 0),   (0, 3, INT 0),
+	      (1, 0, INT 1),   (1, 1, INT 0),   (1, 2, INT 0),   (1, 3, INT 0),
+	      (2, 0, INT 2),   (2, 1, INT 1),   (2, 2, INT 0),   (2, 3, INT 0),
+	      (3, 0, INT 3),   (3, 1, INT 1),   (3, 2, INT 0),   (3, 3, INT 0),
+	      (4, 0, INT 4),   (4, 1, INT 2),   (4, 2, INT 1),   (4, 3, INT 0),
+	      (5, 0, INT 5),   (5, 1, INT 2),   (5, 2, INT 1),   (5, 3, INT 0),
+	      (6, 0, INT 6),   (6, 1, INT 3),   (6, 2, INT 1),   (6, 3, INT 0),
+	      (7, 0, INT 7),   (7, 1, INT 3),   (7, 2, INT 1),   (7, 3, INT 0)
 	    ];
 	  List.app neg [
-	      (3, 0, INT 0), (3, 1, INT 7), (3, 2, INT 6), (3, 3, INT 5), (3, 4, INT 4),
-	      (3, 5, INT 3), (3, 6, INT 2), (3, 7, INT 1)
+	      (0, INT 0), (1, INT 7), (2, INT 6), (3, INT 5), (4, INT 4),
+	      (5, INT 3), (6, INT 2), (7, INT 1)
 	    ];
 	  List.app eq [
-	      (3, ~4, ~4, TRUE), (3, ~4, ~3, FALS), (3, ~4, ~2, FALS), (3, ~4, ~1, FALS),
-	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, FALS), (3, ~3, ~1, FALS),
-	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-              (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-              (3, ~4,  4, TRUE), (3, ~4,  5, FALS), (3, ~4,  6, FALS), (3, ~4,  7, FALS),
-              (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-              (3, ~3,  4, FALS), (3, ~3,  5, TRUE), (3, ~3,  6, FALS), (3, ~3,  7, FALS),
-              (3, ~2,  0, FALS), (3, ~2,  1, FALS), (3, ~2,  2, FALS), (3, ~2,  3, FALS),
-              (3, ~2,  4, FALS), (3, ~2,  5, FALS), (3, ~2,  6, TRUE), (3, ~2,  7, FALS),
-              (3, ~1,  0, FALS), (3, ~1,  1, FALS), (3, ~1,  2, FALS), (3, ~1,  3, FALS),
-              (3, ~1,  4, FALS), (3, ~1,  5, FALS), (3, ~1,  6, FALS), (3, ~1,  7, TRUE),
-	      (3, 0, 0, TRUE),   (3, 0, 1, FALS),   (3, 0, 2, FALS),   (3, 0, 3, FALS),
-	      (3, 0, 4, FALS),   (3, 0, 5, FALS),   (3, 0, 6, FALS),   (3, 0, 7, FALS),
-	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, FALS),   (3, 1, 3, FALS),
-	      (3, 1, 4, FALS),   (3, 1, 5, FALS),   (3, 1, 6, FALS),   (3, 1, 7, FALS),
-	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, FALS),
-	      (3, 2, 4, FALS),   (3, 2, 5, FALS),   (3, 2, 6, FALS),   (3, 2, 7, FALS),
-	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
-	      (3, 3, 4, FALS),   (3, 3, 5, FALS),   (3, 3, 6, FALS),   (3, 3, 7, FALS),
-	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
-	      (3, 4, 4, TRUE),   (3, 4, 5, FALS),   (3, 4, 6, FALS),   (3, 4, 7, FALS),
-	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
-	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, FALS),   (3, 5, 7, FALS),
-	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
-	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, FALS),
-	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
-	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
+	      (~4, ~4, TRUE), (~4, ~3, FALS), (~4, ~2, FALS), (~4, ~1, FALS),
+	      (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+	      (~3, ~4, FALS), (~3, ~3, TRUE), (~3, ~2, FALS), (~3, ~1, FALS),
+	      (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+              (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+              (~4,  4, TRUE), (~4,  5, FALS), (~4,  6, FALS), (~4,  7, FALS),
+              (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+              (~3,  4, FALS), (~3,  5, TRUE), (~3,  6, FALS), (~3,  7, FALS),
+              (~2,  0, FALS), (~2,  1, FALS), (~2,  2, FALS), (~2,  3, FALS),
+              (~2,  4, FALS), (~2,  5, FALS), (~2,  6, TRUE), (~2,  7, FALS),
+              (~1,  0, FALS), (~1,  1, FALS), (~1,  2, FALS), (~1,  3, FALS),
+              (~1,  4, FALS), (~1,  5, FALS), (~1,  6, FALS), (~1,  7, TRUE),
+	      (0, 0, TRUE),   (0, 1, FALS),   (0, 2, FALS),   (0, 3, FALS),
+	      (0, 4, FALS),   (0, 5, FALS),   (0, 6, FALS),   (0, 7, FALS),
+	      (1, 0, FALS),   (1, 1, TRUE),   (1, 2, FALS),   (1, 3, FALS),
+	      (1, 4, FALS),   (1, 5, FALS),   (1, 6, FALS),   (1, 7, FALS),
+	      (2, 0, FALS),   (2, 1, FALS),   (2, 2, TRUE),   (2, 3, FALS),
+	      (2, 4, FALS),   (2, 5, FALS),   (2, 6, FALS),   (2, 7, FALS),
+	      (3, 0, FALS),   (3, 1, FALS),   (3, 2, FALS),   (3, 3, TRUE),
+	      (3, 4, FALS),   (3, 5, FALS),   (3, 6, FALS),   (3, 7, FALS),
+	      (4, 0, FALS),   (4, 1, FALS),   (4, 2, FALS),   (4, 3, FALS),
+	      (4, 4, TRUE),   (4, 5, FALS),   (4, 6, FALS),   (4, 7, FALS),
+	      (5, 0, FALS),   (5, 1, FALS),   (5, 2, FALS),   (5, 3, FALS),
+	      (5, 4, FALS),   (5, 5, TRUE),   (5, 6, FALS),   (5, 7, FALS),
+	      (6, 0, FALS),   (6, 1, FALS),   (6, 2, FALS),   (6, 3, FALS),
+	      (6, 4, FALS),   (6, 5, FALS),   (6, 6, TRUE),   (6, 7, FALS),
+	      (7, 0, FALS),   (7, 1, FALS),   (7, 2, FALS),   (7, 3, FALS),
+	      (7, 4, FALS),   (7, 5, FALS),   (7, 6, FALS),   (7, 7, TRUE)
 	    ];
 	  List.app less [
-	      (3, ~4, ~4, FALS), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
-	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-	      (3, ~3, ~4, FALS), (3, ~3, ~3, FALS), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
-	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-	      (3, 0, 0, FALS),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
-	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
-	      (3, 1, 0, FALS),   (3, 1, 1, FALS),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
-	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
-	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, FALS),   (3, 2, 3, TRUE),
-	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
-	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, FALS),
-	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
-	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
-	      (3, 4, 4, FALS),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
-	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
-	      (3, 5, 4, FALS),   (3, 5, 5, FALS),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
-	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
-	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, FALS),   (3, 6, 7, TRUE),
-	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
-	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, FALS)
+	      (~4, ~4, FALS), (~4, ~3, TRUE), (~4, ~2, TRUE), (~4, ~1, TRUE),
+	      (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+	      (~3, ~4, FALS), (~3, ~3, FALS), (~3, ~2, TRUE), (~3, ~1, TRUE),
+	      (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+	      (0, 0, FALS),   (0, 1, TRUE),   (0, 2, TRUE),   (0, 3, TRUE),
+	      (0, 4, TRUE),   (0, 5, TRUE),   (0, 6, TRUE),   (0, 7, TRUE),
+	      (1, 0, FALS),   (1, 1, FALS),   (1, 2, TRUE),   (1, 3, TRUE),
+	      (1, 4, TRUE),   (1, 5, TRUE),   (1, 6, TRUE),   (1, 7, TRUE),
+	      (2, 0, FALS),   (2, 1, FALS),   (2, 2, FALS),   (2, 3, TRUE),
+	      (2, 4, TRUE),   (2, 5, TRUE),   (2, 6, TRUE),   (2, 7, TRUE),
+	      (3, 0, FALS),   (3, 1, FALS),   (3, 2, FALS),   (3, 3, FALS),
+	      (3, 4, TRUE),   (3, 5, TRUE),   (3, 6, TRUE),   (3, 7, TRUE),
+	      (4, 0, FALS),   (4, 1, FALS),   (4, 2, FALS),   (4, 3, FALS),
+	      (4, 4, FALS),   (4, 5, TRUE),   (4, 6, TRUE),   (4, 7, TRUE),
+	      (5, 0, FALS),   (5, 1, FALS),   (5, 2, FALS),   (5, 3, FALS),
+	      (5, 4, FALS),   (5, 5, FALS),   (5, 6, TRUE),   (5, 7, TRUE),
+	      (6, 0, FALS),   (6, 1, FALS),   (6, 2, FALS),   (6, 3, FALS),
+	      (6, 4, FALS),   (6, 5, FALS),   (6, 6, FALS),   (6, 7, TRUE),
+	      (7, 0, FALS),   (7, 1, FALS),   (7, 2, FALS),   (7, 3, FALS),
+	      (7, 4, FALS),   (7, 5, FALS),   (7, 6, FALS),   (7, 7, FALS)
 	    ];
 	  List.app lessEq [
-	      (3, ~4, ~4, TRUE), (3, ~4, ~3, TRUE), (3, ~4, ~2, TRUE), (3, ~4, ~1, TRUE),
-	      (3, ~4,  0, FALS), (3, ~4,  1, FALS), (3, ~4,  2, FALS), (3, ~4,  3, FALS),
-	      (3, ~3, ~4, FALS), (3, ~3, ~3, TRUE), (3, ~3, ~2, TRUE), (3, ~3, ~1, TRUE),
-	      (3, ~3,  0, FALS), (3, ~3,  1, FALS), (3, ~3,  2, FALS), (3, ~3,  3, FALS),
-	      (3, 0, 0, TRUE),   (3, 0, 1, TRUE),   (3, 0, 2, TRUE),   (3, 0, 3, TRUE),
-	      (3, 0, 4, TRUE),   (3, 0, 5, TRUE),   (3, 0, 6, TRUE),   (3, 0, 7, TRUE),
-	      (3, 1, 0, FALS),   (3, 1, 1, TRUE),   (3, 1, 2, TRUE),   (3, 1, 3, TRUE),
-	      (3, 1, 4, TRUE),   (3, 1, 5, TRUE),   (3, 1, 6, TRUE),   (3, 1, 7, TRUE),
-	      (3, 2, 0, FALS),   (3, 2, 1, FALS),   (3, 2, 2, TRUE),   (3, 2, 3, TRUE),
-	      (3, 2, 4, TRUE),   (3, 2, 5, TRUE),   (3, 2, 6, TRUE),   (3, 2, 7, TRUE),
-	      (3, 3, 0, FALS),   (3, 3, 1, FALS),   (3, 3, 2, FALS),   (3, 3, 3, TRUE),
-	      (3, 3, 4, TRUE),   (3, 3, 5, TRUE),   (3, 3, 6, TRUE),   (3, 3, 7, TRUE),
-	      (3, 4, 0, FALS),   (3, 4, 1, FALS),   (3, 4, 2, FALS),   (3, 4, 3, FALS),
-	      (3, 4, 4, TRUE),   (3, 4, 5, TRUE),   (3, 4, 6, TRUE),   (3, 4, 7, TRUE),
-	      (3, 5, 0, FALS),   (3, 5, 1, FALS),   (3, 5, 2, FALS),   (3, 5, 3, FALS),
-	      (3, 5, 4, FALS),   (3, 5, 5, TRUE),   (3, 5, 6, TRUE),   (3, 5, 7, TRUE),
-	      (3, 6, 0, FALS),   (3, 6, 1, FALS),   (3, 6, 2, FALS),   (3, 6, 3, FALS),
-	      (3, 6, 4, FALS),   (3, 6, 5, FALS),   (3, 6, 6, TRUE),   (3, 6, 7, TRUE),
-	      (3, 7, 0, FALS),   (3, 7, 1, FALS),   (3, 7, 2, FALS),   (3, 7, 3, FALS),
-	      (3, 7, 4, FALS),   (3, 7, 5, FALS),   (3, 7, 6, FALS),   (3, 7, 7, TRUE)
+	      (~4, ~4, TRUE), (~4, ~3, TRUE), (~4, ~2, TRUE), (~4, ~1, TRUE),
+	      (~4,  0, FALS), (~4,  1, FALS), (~4,  2, FALS), (~4,  3, FALS),
+	      (~3, ~4, FALS), (~3, ~3, TRUE), (~3, ~2, TRUE), (~3, ~1, TRUE),
+	      (~3,  0, FALS), (~3,  1, FALS), (~3,  2, FALS), (~3,  3, FALS),
+	      (0, 0, TRUE),   (0, 1, TRUE),   (0, 2, TRUE),   (0, 3, TRUE),
+	      (0, 4, TRUE),   (0, 5, TRUE),   (0, 6, TRUE),   (0, 7, TRUE),
+	      (1, 0, FALS),   (1, 1, TRUE),   (1, 2, TRUE),   (1, 3, TRUE),
+	      (1, 4, TRUE),   (1, 5, TRUE),   (1, 6, TRUE),   (1, 7, TRUE),
+	      (2, 0, FALS),   (2, 1, FALS),   (2, 2, TRUE),   (2, 3, TRUE),
+	      (2, 4, TRUE),   (2, 5, TRUE),   (2, 6, TRUE),   (2, 7, TRUE),
+	      (3, 0, FALS),   (3, 1, FALS),   (3, 2, FALS),   (3, 3, TRUE),
+	      (3, 4, TRUE),   (3, 5, TRUE),   (3, 6, TRUE),   (3, 7, TRUE),
+	      (4, 0, FALS),   (4, 1, FALS),   (4, 2, FALS),   (4, 3, FALS),
+	      (4, 4, TRUE),   (4, 5, TRUE),   (4, 6, TRUE),   (4, 7, TRUE),
+	      (5, 0, FALS),   (5, 1, FALS),   (5, 2, FALS),   (5, 3, FALS),
+	      (5, 4, FALS),   (5, 5, TRUE),   (5, 6, TRUE),   (5, 7, TRUE),
+	      (6, 0, FALS),   (6, 1, FALS),   (6, 2, FALS),   (6, 3, FALS),
+	      (6, 4, FALS),   (6, 5, FALS),   (6, 6, TRUE),   (6, 7, TRUE),
+	      (7, 0, FALS),   (7, 1, FALS),   (7, 2, FALS),   (7, 3, FALS),
+	      (7, 4, FALS),   (7, 5, FALS),   (7, 6, FALS),   (7, 7, TRUE)
 	    ])
     end (* local *)
   end (* TestUnsignedWrapping *)

@@ -74,9 +74,29 @@ functor CheckBitwiseArithFn (
 	    f (chkWid err w, chkArg arg1, chkArg arg2)
 	  end
 
+    fun chkShift name f (w, arg1, n) = let
+	  fun err () = error(concat[
+		  "'", qual, name, "(", Int.toString w, ", ", IntInf.toString arg1,
+                  ", 0w", Word.fmt StringCvt.DEC n, ")'"
+		])
+	  val chkArg = chkArg err w
+	  in
+	    f (chkWid err w, chkArg arg1, n)
+	  end
+
     val bAnd = chk2 "bAnd" A.bAnd
     val bOr  = chk2 "bOr" A.bOr
     val bXor = chk2 "bXor" A.bXor
     val bNot = chk1 "nNot" A.bNot
+
+    val bShiftL  = chkShift "bShiftL" A.bShiftL
+    val bLShiftR = chkShift "bLShiftR" A.bLShiftR
+    val bAShiftR = chkShift "bAShiftR" A.bAShiftR
+    val bRotateL = chkShift "bRotateL" A.bRotateL
+    val bRotateR = chkShift "bRotateR" A.bRotateR
+
+    val bCountOnes          = chk1 "bCountOnes" A.bCountOnes
+    val bCountLeadingZeros  = chk1 "bCountLeadingZeros" A.bCountLeadingZeros
+    val bCountTrailingZeros = chk1 "bCountTrailingZeros" A.bCountTrailingZeros
 
   end
