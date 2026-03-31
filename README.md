@@ -14,7 +14,7 @@ utility modules, and `tools`, which contains some code generation tools.
 
 * [CodeTemplates](libsrc/CodeTemplates/README.md) <a name="make-fragments"></a> --
     Infrastructure for supporting textual code snippits with substitutions.  This
-    code supports the [Make Fragments](#make-fragments) tool descrbied below.
+    code supports the [Make Fragments](#make-fragments) tool described below.
 
 * [Constant arithemetic](libsrc/ConstArith/README.md) -- Infrastructure for
     constant-folding integer arithmetic at different precisions.
