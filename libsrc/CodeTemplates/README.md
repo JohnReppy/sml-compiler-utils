@@ -17,5 +17,10 @@ have the syntax `@`&lt;id&gt;`@` and are replaced with the string associated wit
 &lt;id&gt; in the list `substitutions`.  If &lt;id&gt; is empty, then no substitution
 is applied, instead the `"@@"` is replaced by `"@"`.
 
+There are two versions of the `CodeTemplate` module.  One uses simple strings as the
+substitution text, whereas the other takes a function from a character column to a
+string.  The latter can be used to match the indentation of multi-line substitutions
+to the position of the insertion point.
+
 I often use this mechanism to handle boilerplate code in compilers
 that generate source code in a language like SML, C, or C++.
